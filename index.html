@@ -92,9 +92,9 @@
 <body>
 
   <header>
-    <div class="welcome-banner">Hey Chris! 👋🏾</div>
+    <div class="welcome-banner">Hey You! 👋</div>
     <div class="top-bar">
-      <h1 id="appTitle">💽 CWF Music</h1>
+      <h1 id="appTitle">🎵 My Record Collection</h1>
       <div class="actions-group">
         <button class="btn-small" id="langBtn" onclick="toggleLanguage()">ES</button>
         <button class="btn-small" id="configBtn" onclick="setupToken()">⚙️ Setup</button>
@@ -129,13 +129,11 @@
         <button class="close-btn" onclick="closeScanner()">✕</button>
       </div>
 
-      <!-- Opciones de entrada clara -->
       <div id="scannerOptions">
-        <button class="btn-primary" onclick="document.getElementById('barcodeInputFile').click()">📸 Take photo of barcode / Tomar foto del código</button>
-        <button class="btn-secondary" onclick="showManualInputMode()">⌨️ Enter barcode manually / Escribir código manualmente</button>
+        <button class="btn-primary" onclick="document.getElementById('barcodeInputFile').click()">📸 Take photo of barcode / Tomar foto</button>
+        <button class="btn-secondary" onclick="showManualInputMode()">⌨️ Type barcode manually / Escribir código</button>
       </div>
 
-      <!-- Cuadro de texto manual oculto inicialmente hasta que se elija -->
       <div id="manualInputContainer" style="display:none; margin-top: 10px;">
         <div class="manual-row">
           <input type="tel" id="manualBarcode" placeholder="Enter barcode digits..." />
@@ -170,7 +168,6 @@
   </div>
 
   <script>
-    // CONFIGURA TUS DATOS DE GITHUB AQUÍ
     const GITHUB_USER = "nefozoide";
     const GITHUB_REPO = "CWFML";
     const FILE_PATH = "database.json";
@@ -182,7 +179,7 @@
 
     const translations = {
       en: {
-        title: "🎵 Record Collection",
+        title: "🎵 My Record Collection",
         searchPlaceholder: "Search artist, album, genre or barcode...",
         scanBtn: "📷 Scan or Search UPC",
         loading: "Loading collection from GitHub...",
@@ -237,7 +234,7 @@
     function toggleLanguage() {
       currentLang = currentLang === "en" ? "es" : "en";
       localStorage.setItem("app_lang", currentLang);
-      applyLanguage();
+      applyLanguage(); // <-- Aplicación inmediata del idioma al hacer clic
     }
 
     function applyLanguage() {
@@ -254,7 +251,9 @@
       document.getElementById("lblYear").innerText = t.year;
       document.getElementById("lblCover").innerText = t.coverUrl;
       document.getElementById("btnSaveGithub").innerText = t.save;
-      document.getElementById("langBtn").innerText = currentLang === "en" ? "ES" : "es" ? "EN";
+      
+      // El botón ahora alterna correctamente al instante
+      document.getElementById("langBtn").innerText = currentLang === "en" ? "ES" : "EN";
       document.getElementById("configBtn").innerText = currentLang === "es" ? "⚙️ Config" : "⚙️ Setup";
       document.getElementById("manualBarcode").placeholder = t.enterBarcode;
       
