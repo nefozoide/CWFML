@@ -254,7 +254,7 @@
       document.getElementById("lblYear").innerText = t.year;
       document.getElementById("lblCover").innerText = t.coverUrl;
       document.getElementById("btnSaveGithub").innerText = t.save;
-      document.getElementById("langBtn").innerText = currentLang.toUpperCase();
+      document.getElementById("langBtn").innerText = currentLang === "en" ? "ES" : "EN";
       document.getElementById("configBtn").innerText = currentLang === "es" ? "⚙️ Config" : "⚙️ Setup";
       document.getElementById("manualBarcode").placeholder = t.enterBarcode;
       
