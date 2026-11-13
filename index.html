@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <meta name="theme-color" content="#0f1115" />
-  <title>Mi Colección de Música</title>
+  <title>Record Collection</title>
   <link rel="manifest" href="manifest.json" />
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <style>
@@ -20,10 +20,17 @@
       background: rgba(15, 17, 21, 0.92); backdrop-filter: blur(12px);
       padding: 16px; border-bottom: 1px solid var(--border);
     }
-    .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-    h1 { font-size: 1.25rem; font-weight: 700; }
-    .config-btn { background: var(--card); border: 1px solid var(--border); color: var(--muted); padding: 5px 10px; border-radius: 8px; font-size: 0.75rem; cursor: pointer; }
-    .badge-count { background: var(--card); border: 1px solid var(--border); padding: 4px 10px; border-radius: 999px; font-size: 0.8rem; color: var(--muted); }
+    .welcome-banner {
+      font-size: 1.1rem; font-weight: 800; color: var(--accent); margin-bottom: 6px;
+      letter-spacing: -0.01em; animation: fadeIn 0.8s ease-in-out;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+    .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px; }
+    h1 { font-size: 1.2rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .actions-group { display: flex; gap: 6px; align-items: center; }
+    .btn-small { background: var(--card); border: 1px solid var(--border); color: var(--muted); padding: 5px 9px; border-radius: 8px; font-size: 0.75rem; cursor: pointer; }
+    .badge-count { background: var(--card); border: 1px solid var(--border); padding: 4px 10px; border-radius: 999px; font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
 
     .search-box {
       width: 100%; padding: 12px 14px; border-radius: 12px;
@@ -70,6 +77,8 @@
     .manual-row { display: flex; gap: 8px; margin-top: 10px; }
     .manual-row input, .manual-row select { flex: 1; padding: 11px; border-radius: 10px; background: var(--bg); border: 1px solid var(--border); color: #fff; outline: none; }
     .btn-primary { background: var(--accent); color: #000; border: none; border-radius: 10px; padding: 12px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 10px; }
+    .btn-secondary { background: var(--border); color: var(--text); border: none; border-radius: 10px; padding: 12px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 8px; }
+    
     .result-box { margin-top: 14px; padding: 14px; border-radius: 12px; display: none; color: var(--text); }
     .result-box.duplicate { display: block; background: rgba(245, 158, 11, 0.15); border: 1px solid var(--warn); }
     .result-box.added { display: block; background: rgba(29, 185, 84, 0.15); border: 1px solid var(--accent); }
@@ -83,14 +92,18 @@
 <body>
 
   <header>
+    <div class="welcome-banner">Hey Chris! 👋🏾</div>
     <div class="top-bar">
-      <h1>🎵 Mi Discoteca</h1>
-      <button class="config-btn" onclick="setupToken()">⚙️ Configurar</button>
-      <span class="badge-count" id="totalCount">Cargando...</span>
+      <h1 id="appTitle">💽 CWF Music</h1>
+      <div class="actions-group">
+        <button class="btn-small" id="langBtn" onclick="toggleLanguage()">ES</button>
+        <button class="btn-small" id="configBtn" onclick="setupToken()">⚙️ Setup</button>
+        <span class="badge-count" id="totalCount">Loading...</span>
+      </div>
     </div>
-    <input type="text" id="searchInput" class="search-box" placeholder="Buscar artista, álbum, género o código..." oninput="renderGrid()" />
+    <input type="text" id="searchInput" class="search-box" placeholder="Search artist, album, genre or barcode..." oninput="renderGrid()" />
     <div class="filters">
-      <div class="chip active" onclick="setFilter('ALL', this)">Todos</div>
+      <div class="chip active" onclick="setFilter('ALL', this)" data-key="all">All</div>
       <div class="chip" onclick="setFilter('Vinyl (LP)', this)">Vinyl (LP)</div>
       <div class="chip" onclick="setFilter('SACD', this)">SACD</div>
       <div class="chip" onclick="setFilter('CD', this)">CD</div>
@@ -100,11 +113,11 @@
   </header>
 
   <main id="gridContainer" class="grid">
-    <div class="loader">Cargando colección desde GitHub...</div>
+    <div class="loader" id="loadingText">Loading collection from GitHub...</div>
   </main>
 
-  <button class="fab" onclick="document.getElementById('barcodeInputFile').click()">
-    📷 Escanear o Buscar UPC
+  <button class="fab" id="fabBtn" onclick="openScannerModal()">
+    📷 Scan or Search UPC
   </button>
 
   <input type="file" id="barcodeInputFile" accept="image/*" capture="environment" style="display:none;" onchange="handleBarcodeInput(event)">
@@ -112,25 +125,34 @@
   <div class="modal-backdrop" id="scannerModal">
     <div class="modal">
       <div class="modal-header">
-        <h3 id="modalTitle">Registro de Discos</h3>
+        <h3 id="modalTitle">Record Registration</h3>
         <button class="close-btn" onclick="closeScanner()">✕</button>
       </div>
 
-      <div class="manual-row">
-        <input type="tel" id="manualBarcode" placeholder="Escribe código de barras..." />
-        <button class="btn-primary" style="width: auto; margin-top:0;" onclick="processBarcode(document.getElementById('manualBarcode').value)">Buscar</button>
+      <!-- Opciones de entrada clara -->
+      <div id="scannerOptions">
+        <button class="btn-primary" onclick="document.getElementById('barcodeInputFile').click()">📸 Take photo of barcode / Tomar foto del código</button>
+        <button class="btn-secondary" onclick="showManualInputMode()">⌨️ Enter barcode manually / Escribir código manualmente</button>
+      </div>
+
+      <!-- Cuadro de texto manual oculto inicialmente hasta que se elija -->
+      <div id="manualInputContainer" style="display:none; margin-top: 10px;">
+        <div class="manual-row">
+          <input type="tel" id="manualBarcode" placeholder="Enter barcode digits..." />
+          <button class="btn-primary" style="width: auto; margin-top:0;" onclick="processBarcode(document.getElementById('manualBarcode').value)">Search</button>
+        </div>
       </div>
 
       <div id="scanResult" class="result-box"></div>
 
       <div id="manualForm" class="form-group">
         <hr style="border: 0; border-top: 1px solid var(--border); margin: 15px 0;">
-        <p style="font-size: 0.85rem; color: var(--warn); margin-bottom: 10px;">⚠️ No registrado en base de datos. Completa los datos:</p>
-        <label>Artista:</label>
-        <input type="text" id="mArtist" placeholder="Ej. Stevie Wonder" />
-        <label style="margin-top: 8px;">Título del Álbum:</label>
-        <input type="text" id="mTitle" placeholder="Ej. Songs in the Key of Life" />
-        <label style="margin-top: 8px;">Formato:</label>
+        <p style="font-size: 0.85rem; color: var(--warn); margin-bottom: 10px;" id="warningText">⚠️ Not found in databases. Complete details:</p>
+        <label id="lblArtist">Artist:</label>
+        <input type="text" id="mArtist" placeholder="e.g. Stevie Wonder" />
+        <label style="margin-top: 8px;" id="lblTitle">Album Title:</label>
+        <input type="text" id="mTitle" placeholder="e.g. Songs in the Key of Life" />
+        <label style="margin-top: 8px;" id="lblFormat">Format:</label>
         <select id="mFormat">
           <option value="CD">CD</option>
           <option value="Vinyl (LP)">Vinyl (LP)</option>
@@ -138,17 +160,17 @@
           <option value="SACD">SACD</option>
           <option value="Box Set">Box Set</option>
         </select>
-        <label style="margin-top: 8px;">Año:</label>
-        <input type="tel" id="mYear" placeholder="Ej. 1976" />
-        <label style="margin-top: 8px;">URL de Portada (Opcional):</label>
+        <label style="margin-top: 8px;" id="lblYear">Year:</label>
+        <input type="tel" id="mYear" placeholder="e.g. 1976" />
+        <label style="margin-top: 8px;" id="lblCover">Cover URL (Optional):</label>
         <input type="text" id="mCover" placeholder="https://..." />
-        <button class="btn-primary" onclick="saveManualAlbum()">Guardar en GitHub</button>
+        <button class="btn-primary" id="btnSaveGithub" onclick="saveManualAlbum()">Save to GitHub</button>
       </div>
     </div>
   </div>
 
   <script>
-    // CONFIGURACIÓN DE TU REPOSITORIO DE GITHUB
+    // CONFIGURA TUS DATOS DE GITHUB AQUÍ
     const GITHUB_USER = "nefozoide";
     const GITHUB_REPO = "CWFML";
     const FILE_PATH = "database.json";
@@ -156,49 +178,121 @@
     let allAlbums = [];
     let activeFormat = "ALL";
     let scannedBarcodeCache = "";
+    let currentLang = localStorage.getItem("app_lang") || "en";
+
+    const translations = {
+      en: {
+        title: "🎵 Record Collection",
+        searchPlaceholder: "Search artist, album, genre or barcode...",
+        scanBtn: "📷 Scan or Search UPC",
+        loading: "Loading collection from GitHub...",
+        errorLoad: "Could not load database from GitHub.",
+        total: "titles",
+        modalTitle: "Record Registration",
+        warning: "⚠️ Not found in databases. Complete details:",
+        artist: "Artist:",
+        albumTitle: "Album Title:",
+        format: "Format:",
+        year: "Year:",
+        coverUrl: "Cover URL (Optional):",
+        save: "Save to GitHub",
+        search: "Search",
+        typeManual: "⌨️ Type barcode manually",
+        takePhoto: "📸 Take photo of barcode",
+        enterBarcode: "Enter barcode digits...",
+        notAdded: "Could not process code."
+      },
+      es: {
+        title: "🎵 Mi Discoteca",
+        searchPlaceholder: "Buscar artista, álbum, género o código...",
+        scanBtn: "📷 Escanear o Buscar UPC",
+        loading: "Cargando colección desde GitHub...",
+        errorLoad: "No se pudo cargar la base de datos de GitHub.",
+        total: "títulos",
+        modalTitle: "Registro de Discos",
+        warning: "⚠️ No registrado en bases de datos. Completa:",
+        artist: "Artista:",
+        albumTitle: "Título del Álbum:",
+        format: "Formato:",
+        year: "Año:",
+        coverUrl: "URL de Portada (Opcional):",
+        save: "Guardar en GitHub",
+        search: "Buscar",
+        typeManual: "⌨️ Escribir código manualmente",
+        takePhoto: "📸 Tomar foto del código de barras",
+        enterBarcode: "Escribe el código de barras...",
+        notAdded: "Error procesando el código."
+      }
+    };
 
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
     }
 
-    window.onload = loadCollection;
+    window.onload = () => {
+      applyLanguage();
+      loadCollection();
+    };
 
-    function getToken() {
-      return localStorage.getItem("gh_token") || "";
+    function toggleLanguage() {
+      currentLang = currentLang === "en" ? "es" : "en";
+      localStorage.setItem("app_lang", currentLang);
+      applyLanguage();
     }
 
+    function applyLanguage() {
+      const t = translations[currentLang];
+      document.getElementById("appTitle").innerText = t.title;
+      document.getElementById("searchInput").placeholder = t.searchPlaceholder;
+      document.getElementById("fabBtn").innerHTML = t.scanBtn;
+      document.getElementById("loadingText").innerText = t.loading;
+      document.getElementById("modalTitle").innerText = t.modalTitle;
+      document.getElementById("warningText").innerText = t.warning;
+      document.getElementById("lblArtist").innerText = t.artist;
+      document.getElementById("lblTitle").innerText = t.albumTitle;
+      document.getElementById("lblFormat").innerText = t.format;
+      document.getElementById("lblYear").innerText = t.year;
+      document.getElementById("lblCover").innerText = t.coverUrl;
+      document.getElementById("btnSaveGithub").innerText = t.save;
+      document.getElementById("langBtn").innerText = currentLang.toUpperCase();
+      document.getElementById("configBtn").innerText = currentLang === "es" ? "⚙️ Config" : "⚙️ Setup";
+      document.getElementById("manualBarcode").placeholder = t.enterBarcode;
+      
+      const countEl = document.getElementById("totalCount");
+      if(allAlbums.length >= 0) countEl.innerText = allAlbums.length + " " + t.total;
+    }
+
+    function getToken() { return localStorage.getItem("gh_token") || ""; }
     function setupToken() {
-      const current = getToken();
-      const token = prompt("Ingresa tu Token de acceso personal de GitHub (con permisos de repo):", current);
-      if (token !== null) {
-        localStorage.setItem("gh_token", token.trim());
-        alert("¡Token guardado correctamente!");
-        loadCollection();
-      }
+      const promptText = currentLang === "es" 
+        ? "Ingresa tu Token de acceso personal de GitHub (con permisos de repo):" 
+        : "Enter your GitHub Personal Access Token (with repo permissions):";
+      const token = prompt(promptText, getToken());
+      if (token !== null) { localStorage.setItem("gh_token", token.trim()); alert(currentLang === "es" ? "¡Token guardado!" : "Token saved!"); loadCollection(); }
     }
 
     async function loadCollection() {
       try {
         const url = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/${FILE_PATH}?t=${Date.now()}`;
         const res = await fetch(url);
-        if (!res.ok) throw new Error("No se pudo cargar");
+        if (!res.ok) throw new Error();
         allAlbums = await res.json() || [];
-        document.getElementById("totalCount").innerText = allAlbums.length + " títulos";
+        const t = translations[currentLang];
+        document.getElementById("totalCount").innerText = allAlbums.length + " " + t.total;
         renderGrid();
       } catch (err) {
         document.getElementById("totalCount").innerText = "Error";
-        document.getElementById("gridContainer").innerHTML = '<div class="loader">No se pudo cargar la base de datos de GitHub.</div>';
+        const t = translations[currentLang];
+        document.getElementById("gridContainer").innerHTML = `<div class="loader">${t.errorLoad}</div>`;
       }
     }
 
-    function setFormat(format, el) {
+    function setFilter(format, el) {
       activeFormat = format;
       document.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
       el.classList.add("active");
       renderGrid();
     }
-
-    function setFilter(format, el) { setFormat(format, el); }
 
     function renderGrid() {
       const q = document.getElementById("searchInput").value.toLowerCase().trim();
@@ -211,7 +305,7 @@
       });
 
       if (filtered.length === 0) {
-        container.innerHTML = '<div class="loader">No se encontraron discos con ese filtro.</div>';
+        container.innerHTML = `<div class="loader">${currentLang === 'es' ? 'No se encontraron discos con ese filtro.' : 'No records found.'}</div>`;
         return;
       }
 
@@ -233,19 +327,36 @@
       `).join("");
     }
 
+    function openScannerModal() {
+      document.getElementById("scannerOptions").style.display = "block";
+      document.getElementById("manualInputContainer").style.display = "none";
+      document.getElementById("scannerModal").classList.add("open");
+      document.getElementById("scanResult").style.display = "none";
+      document.getElementById("manualForm").classList.remove("active");
+    }
+
     function closeScanner() {
       document.getElementById("scannerModal").classList.remove("open");
       document.getElementById("manualForm").classList.remove("active");
+    }
+
+    function showManualInputMode() {
+      document.getElementById("scannerOptions").style.display = "none";
+      document.getElementById("manualInputContainer").style.display = "block";
+      document.getElementById("manualBarcode").focus();
     }
 
     async function handleBarcodeInput(event) {
       const file = event.target.files[0];
       if (!file) return;
 
+      document.getElementById("scannerOptions").style.display = "none";
+      document.getElementById("manualInputContainer").style.display = "block";
+      
       const resBox = document.getElementById("scanResult");
       resBox.className = "result-box added";
       resBox.style.display = "block";
-      resBox.innerHTML = "🔍 Analizando foto del código de barras...";
+      resBox.innerHTML = currentLang === 'es' ? "🔍 Analizando foto del código..." : "🔍 Analyzing barcode photo...";
       document.getElementById("manualForm").classList.remove("active");
       document.getElementById("scannerModal").classList.add("open");
 
@@ -258,7 +369,9 @@
         }
       } catch (err) {
         resBox.className = "result-box error";
-        resBox.innerHTML = "⚠️ No se leyó automáticamente. Escribe el número del código abajo:";
+        resBox.innerHTML = currentLang === 'es' 
+          ? "⚠️ No se leyó automáticamente. Escribe el número del código abajo:" 
+          : "⚠️ Could not read automatically. Type the barcode below:";
       } finally {
         event.target.value = "";
       }
@@ -274,27 +387,38 @@
       resBox.style.display = "block";
       document.getElementById("manualForm").classList.remove("active");
 
-      // 1. Revisar si ya existe en la base de datos local
       const duplicate = allAlbums.find(item => item.barcode === barcode);
       if (duplicate) {
         resBox.className = "result-box duplicate";
-        resBox.innerHTML = `<strong>⚠️ ¡Ya lo tienes!</strong><br>${duplicate.artist} – <i>${duplicate.title}</i> (${duplicate.format})`;
+        resBox.innerHTML = currentLang === 'es'
+          ? `<strong>⚠️ ¡Ya lo tienes!</strong><br>${duplicate.artist} – <i>${duplicate.title}</i> (${duplicate.format})`
+          : `<strong>⚠️ Already in collection!</strong><br>${duplicate.artist} – <i>${duplicate.title}</i> (${duplicate.format})`;
         return;
       }
 
-      resBox.innerHTML = `🔍 Consultando código <b>${barcode}</b> en MusicBrainz...`;
+      resBox.innerHTML = currentLang === 'es' 
+        ? `🔍 Buscando código <b>${barcode}</b>...` 
+        : `🔍 Searching barcode <b>${barcode}</b>...`;
 
-      // 2. Buscar en MusicBrainz
       try {
-        const meta = await lookupMusicBrainz(barcode);
+        let meta = await lookupMusicBrainz(barcode);
+        if (!meta.found) {
+          meta = await lookupDiscogs(barcode);
+        }
+
         if (!meta.found) {
           resBox.className = "result-box error";
-          resBox.innerHTML = `<strong>❌ No encontrado en MusicBrainz</strong><br>Código: ${barcode}. Completa los datos manualmente abajo:`;
+          resBox.innerHTML = currentLang === 'es'
+            ? `<strong>❌ No encontrado</strong><br>Código: ${barcode}. Complétalo abajo:`
+            : `<strong>❌ Not found</strong><br>Barcode: ${barcode}. Fill details below:`;
           document.getElementById("manualForm").classList.add("active");
+          document.getElementById("mArtist").value = "";
+          document.getElementById("mTitle").value = "";
+          document.getElementById("mYear").value = "";
+          document.getElementById("mCover").value = "";
           return;
         }
 
-        // Agregar el álbum a GitHub
         const newAlbum = {
           barcode: barcode,
           artist: meta.artist,
@@ -307,11 +431,13 @@
 
         await saveAlbumToGitHub(newAlbum);
         resBox.className = "result-box added";
-        resBox.innerHTML = `<strong>✅ ¡Agregado a GitHub!</strong><br>${meta.artist} – <i>${meta.title}</i> (${meta.format})`;
+        resBox.innerHTML = currentLang === 'es'
+          ? `<strong>✅ ¡Agregado a GitHub!</strong><br>${meta.artist} – <i>${meta.title}</i> (${meta.format})`
+          : `<strong>✅ Added to GitHub!</strong><br>${meta.artist} – <i>${meta.title}</i> (${meta.format})`;
         loadCollection();
       } catch (err) {
         resBox.className = "result-box error";
-        resBox.innerHTML = `❌ Error procesando el código.`;
+        resBox.innerHTML = currentLang === 'es' ? "❌ Error procesando el código." : "❌ Error processing barcode.";
       }
     }
 
@@ -359,6 +485,36 @@
       }
     }
 
+    async function lookupDiscogs(barcode) {
+      try {
+        const res = await fetch(`https://api.discogs.com/database/search?barcode=${barcode}&type=release`, {
+          headers: { "User-Agent": "MusicCollectionApp/1.0" }
+        });
+        const data = await res.json();
+        if (!data.results || data.results.length === 0) return { found: false };
+
+        const item = data.results[0];
+        const titleParts = (item.title || "").split(" - ");
+        const artist = titleParts.length > 1 ? titleParts[0] : "Unknown Artist";
+        const title = titleParts.length > 1 ? titleParts.slice(1).join(" - ") : item.title;
+        const year = item.year ? String(item.year) : "";
+        const coverUrl = item.cover_image || "";
+
+        let format = "CD";
+        const fmtStr = (item.format || []).join(" ").toLowerCase();
+        if (fmtStr.includes("blu-ray")) format = "Blu-ray";
+        else if (fmtStr.includes("vinyl") || fmtStr.includes("lp")) format = "Vinyl (LP)";
+        else if (fmtStr.includes("sacd")) format = "SACD";
+        else if (fmtStr.includes("box set")) format = "Box Set";
+
+        let genre = (item.genre || []).join(", ");
+
+        return { found: true, artist, title, format, year, genre, coverUrl };
+      } catch {
+        return { found: false };
+      }
+    }
+
     async function saveManualAlbum() {
       const artist = document.getElementById("mArtist").value.trim();
       const title = document.getElementById("mTitle").value.trim();
@@ -366,55 +522,46 @@
       const year = document.getElementById("mYear").value.trim();
       const coverUrl = document.getElementById("mCover").value.trim();
 
-      if (!artist || !title) {
-        alert("Completa al menos el Artista y el Título.");
-        return;
+      if (!artist || !title) { 
+        alert(currentLang === 'es' ? "Completa al menos Artista y Título." : "Complete at least Artist and Title."); 
+        return; 
       }
 
       const newAlbum = { barcode: scannedBarcodeCache, artist, title, format, year, genre: "", coverUrl };
       const resBox = document.getElementById("scanResult");
-      resBox.innerHTML = "💾 Guardando en GitHub...";
+      resBox.innerHTML = currentLang === 'es' ? "💾 Guardando en GitHub..." : "💾 Saving to GitHub...";
 
       try {
         await saveAlbumToGitHub(newAlbum);
         resBox.className = "result-box added";
-        resBox.innerHTML = `<strong>✅ ¡Guardado con éxito!</strong><br>${artist} – <i>${title}</i>`;
+        resBox.innerHTML = currentLang === 'es'
+          ? `<strong>✅ ¡Guardado con éxito!</strong><br>${artist} – <i>${title}</i>`
+          : `<strong>✅ Saved successfully!</strong><br>${artist} – <i>${title}</i>`;
         document.getElementById("manualForm").classList.remove("active");
         loadCollection();
-      } catch (err) {
+      } catch {
         resBox.className = "result-box error";
-        resBox.innerHTML = `❌ Error al guardar. Verifica tu Token de GitHub.`;
+        resBox.innerHTML = currentLang === 'es' ? "❌ Error al guardar. Token inválido." : "❌ Save error. Invalid Token.";
       }
     }
 
     async function saveAlbumToGitHub(newAlbum) {
       const token = getToken();
-      if (!token) {
-        setupToken();
-        throw new Error("Token requerido");
-      }
+      if (!token) { setupToken(); throw new Error("Token requerido"); }
 
       const apiUrl = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${FILE_PATH}`;
-      
-      // 1. Obtener el archivo actual y su SHA
-      const getRes = await fetch(apiUrl, {
-        headers: { "Authorization": `token ${token}` }
-      });
-      if (!getRes.ok) throw new Error("Error obteniendo el archivo de GitHub");
+      const getRes = await fetch(apiUrl, { headers: { "Authorization": `token ${token}` } });
+      if (!getRes.ok) throw new Error();
       const fileData = await getRes.json();
       
       const currentContent = JSON.parse(decodeURIComponent(escape(atob(fileData.content))));
-      currentContent.unshift(newAlbum); // Añadir al principio
+      currentContent.unshift(newAlbum);
 
-      // 2. Codificar y actualizar en GitHub
       const updatedContentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(currentContent, null, 2))));
 
       const putRes = await fetch(apiUrl, {
         method: "PUT",
-        headers: {
-          "Authorization": `token ${token}`,
-          "Content-Type": "application/json"
-        },
+        headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify({
           message: `Add album: ${newAlbum.artist} - ${newAlbum.title}`,
           content: updatedContentBase64,
@@ -422,7 +569,7 @@
         })
       });
 
-      if (!putRes.ok) throw new Error("Error guardando en GitHub");
+      if (!putRes.ok) throw new Error();
     }
   </script>
 </body>
