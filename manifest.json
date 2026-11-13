@@ -1,6 +1,6 @@
 {
-  "name": "Mi Colección de Música",
-  "short_name": "Discoteca",
+  "name": "💽 CWF Music",
+  "short_name": "💽 Manager",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0f1115",
