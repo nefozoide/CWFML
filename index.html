@@ -84,7 +84,6 @@
       box-shadow: 0 10px 25px rgba(29, 185, 84, 0.35); cursor: pointer; z-index: 30;
     }
 
-    /* Modal Oscuro Corregido */
     .modal-backdrop {
       display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85);
       z-index: 50; align-items: flex-end; justify-content: center;
@@ -97,6 +96,11 @@
     }
     .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
     .close-btn { background: none; border: none; color: var(--muted); font-size: 1.5rem; cursor: pointer; }
+
+    .manual-row { display: flex; gap: 8px; margin-top: 14px; }
+    .manual-row input { flex: 1; padding: 11px; border-radius: 10px; background: var(--bg); border: 1px solid var(--border); color: #fff; outline: none; }
+    .manual-row input:focus { border-color: var(--accent); }
+    .btn-primary { background: var(--accent); color: #000; border: none; border-radius: 10px; padding: 0 16px; font-weight: 700; cursor: pointer; }
 
     .result-box { margin-top: 14px; padding: 14px; border-radius: 12px; display: none; color: var(--text); }
     .result-box.duplicate { display: block; background: rgba(245, 158, 11, 0.15); border: 1px solid var(--warn); }
@@ -127,9 +131,8 @@
     <div class="loader">Cargando tu colección...</div>
   </main>
 
-  <!-- Botón que activa el selector nativo de cámara -->
   <button class="fab" onclick="document.getElementById('barcodeInputFile').click()">
-    📷 Escanear Código de Barras
+    📷 Escanear o Agregar Disco
   </button>
 
   <input type="file" id="barcodeInputFile" accept="image/*" capture="environment" style="display:none;" onchange="handleBarcodeInput(event)">
@@ -138,18 +141,21 @@
   <div class="modal-backdrop" id="scannerModal">
     <div class="modal">
       <div class="modal-header">
-        <h3 id="modalTitle">Escanear UPC</h3>
+        <h3 id="modalTitle">Registro de Discos</h3>
         <button class="close-btn" onclick="closeScanner()">✕</button>
       </div>
-      <div id="scanResult" class="result-box">
-        🔍 Selecciona o toma una foto del código de barras.
+
+      <div class="manual-row">
+        <input type="tel" id="manualBarcode" placeholder="Escribe o pega el código de barras..." />
+        <button class="btn-primary" onclick="submitBarcode(document.getElementById('manualBarcode').value)">Buscar</button>
       </div>
+
+      <div id="scanResult" class="result-box"></div>
     </div>
   </div>
 
   <script>
-    const API_URL = https://script.google.com/macros/s/AKfycbw1C9ZViwJTQv7JlUIw6q12ajx_2qfKkuAYmaL0cUlUaNwqrv6yrnqILwk0EefuHyXnvg/exec
-;
+    const API_URL = https://script.google.com/macros/s/AKfycbw1C9ZViwJTQv7JlUIw6q12ajx_2qfKkuAYmaL0cUlUaNwqrv6yrnqILwk0EefuHyXnvg/exec;
 
     let allAlbums = [];
     let activeFormat = "ALL";
@@ -159,128 +165,3 @@
         navigator.serviceWorker.register("sw.js").catch(err => console.error("Error SW:", err));
       });
     }
-
-    window.onload = loadCollection;
-
-    async function loadCollection() {
-      try {
-        const response = await fetch(API_URL);
-        const data = await response.json();
-        allAlbums = data || [];
-        document.getElementById("totalCount").innerText = allAlbums.length + " títulos";
-        renderGrid();
-      } catch (err) {
-        document.getElementById("totalCount").innerText = "Error";
-        document.getElementById("gridContainer").innerHTML =
-          '<div class="loader">No se pudo conectar con la base de datos. Verifica tu URL de Apps Script.</div>';
-      }
-    }
-
-    function setFilter(format, el) {
-      activeFormat = format;
-      document.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
-      el.classList.add("active");
-      renderGrid();
-    }
-
-    function renderGrid() {
-      const q = document.getElementById("searchInput").value.toLowerCase().trim();
-      const container = document.getElementById("gridContainer");
-
-      const filtered = allAlbums.filter(item => {
-        const matchesFormat = activeFormat === "ALL" || item.format === activeFormat;
-        const matchesQuery = !q ||
-          item.artist.toLowerCase().includes(q) ||
-          item.title.toLowerCase().includes(q) ||
-          (item.genre && item.genre.toLowerCase().includes(q)) ||
-          item.barcode.includes(q);
-        return matchesFormat && matchesQuery;
-      });
-
-      if (filtered.length === 0) {
-        container.innerHTML = '<div class="loader">No se encontraron discos con ese filtro.</div>';
-        return;
-      }
-
-      container.innerHTML = filtered.map(item => `
-        <div class="album-card">
-          <div class="cover-wrap">
-            ${item.coverUrl
-              ? `<img src="${item.coverUrl}" alt="${item.title}" loading="lazy" />`
-              : `<div class="no-cover">💿</div>`}
-            ${item.format ? `<span class="format-tag">${item.format}</span>` : ""}
-          </div>
-          <div class="info">
-            <div class="title">${item.title}</div>
-            <div class="artist">${item.artist}</div>
-            <div class="meta-row">
-              <span class="year">${item.year || ""}</span>
-              <span class="genre">${item.genre || ""}</span>
-            </div>
-          </div>
-        </div>
-      `).join("");
-    }
-
-    function closeScanner() {
-      document.getElementById("scannerModal").classList.remove("open");
-    }
-
-    async function handleBarcodeInput(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      document.getElementById("modalTitleinnerText") = "Procesando...";
-      const resBox = document.getElementById("scanResult");
-      resBox.className = "result-box added";
-      resBox.style.display = "block";
-      resBox.innerHTML = "🔍 Analizando la foto del código de barras...";
-      document.getElementById("scannerModal").classList.add("open");
-
-      try {
-        const html5QrCode = new Html5Qrcode("scanResult");
-        const decodedText = await html5QrCode.scanFile(file, true);
-        
-        if (decodedText) {
-          submitBarcode(decodedText);
-        }
-      } catch (err) {
-        resBox.className = "result-box error";
-        resBox.innerHTML = "❌ No se pudo detectar el código de barras en la foto. Intenta de nuevo enfocando bien el código UPC.";
-      } finally {
-        event.target.value = "";
-      }
-    }
-
-    async function submitBarcode(code) {
-      if (!code || !code.trim()) return;
-      const resBox = document.getElementById("scanResult");
-      resBox.className = "result-box added";
-      resBox.style.display = "block";
-      resBox.innerHTML = "🔍 Consultando código <b>" + code + "</b> en MusicBrainz...";
-
-      try {
-        const response = await fetch(API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ action: "scan", barcode: code })
-        });
-        const res = await response.json();
-
-        resBox.className = "result-box " + res.status;
-        if (res.status === "duplicate") {
-          resBox.innerHTML = `<strong>⚠️ ¡Ya lo tienes!</strong><br>${res.album.artist} – <i>${res.album.title}</i> (${res.album.format})`;
-        } else if (res.status === "added") {
-          resBox.innerHTML = `<strong>✅ ¡Agregado exitosamente!</strong><br>${res.album.artist} – <i>${res.album.title}</i> (${res.album.format})`;
-          loadCollection();
-        } else {
-          resBox.innerHTML = `<strong>❌ No encontrado</strong><br>${res.message}`;
-        }
-      } catch (err) {
-        resBox.className = "result-box error";
-        resBox.innerHTML = `<strong>❌ Error de conexión</strong><br>No se pudo comunicar con Google Sheets.`;
-      }
-    }
-  </script>
-</body>
-</html>
