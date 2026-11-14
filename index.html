@@ -61,13 +61,20 @@
     .btn-small { background: var(--card); border: 1px solid var(--border); color: var(--muted); padding: 5px 9px; border-radius: 8px; font-size: 0.75rem; cursor: pointer; height: 28px; display: flex; align-items: center; }
     .badge-count { background: var(--card); border: 1px solid var(--border); padding: 4px 10px; border-radius: 999px; font-size: 0.8rem; color: var(--muted); white-space: nowrap; height: 28px; display: flex; align-items: center; }
 
+    .search-controls { display: flex; gap: 8px; margin-bottom: 12px; }
     .search-box {
-      width: 100%; padding: 12px 14px; border-radius: 12px;
+      flex: 1; padding: 12px 14px; border-radius: 12px;
       background: var(--card); border: 1px solid var(--border); color: var(--text); font-size: 0.95rem; outline: none;
     }
     .search-box:focus { border-color: var(--accent); }
 
-    .filters { display: flex; gap: 8px; overflow-x: auto; padding-top: 12px; scrollbar-width: none; }
+    .sort-select {
+      background: var(--card); border: 1px solid var(--border); color: var(--text);
+      padding: 0 10px; border-radius: 12px; font-size: 0.85rem; outline: none; cursor: pointer;
+    }
+    .sort-select:focus { border-color: var(--accent); }
+
+    .filters { display: flex; gap: 8px; overflow-x: auto; padding-top: 4px; scrollbar-width: none; }
     .filters::-webkit-scrollbar { display: none; }
     .chip {
       padding: 6px 14px; border-radius: 999px; font-size: 0.82rem; font-weight: 600;
@@ -161,7 +168,18 @@
         <span class="badge-count" id="totalCount">Loading...</span>
       </div>
     </div>
-    <input type="text" id="searchInput" class="search-box" placeholder="Search artist, album, genre or barcode..." oninput="renderGrid()" />
+
+    <div class="search-controls">
+      <input type="text" id="searchInput" class="search-box" placeholder="Search artist, album, genre or barcode..." oninput="renderGrid()" />
+      <select id="sortSelect" class="sort-select" onchange="renderGrid()">
+        <option value="artist-asc">👤 Artist (A-Z)</option>
+        <option value="artist-desc">👤 Artist (Z-A)</option>
+        <option value="title-asc">💿 Title (A-Z)</option>
+        <option value="year-desc">📅 Year (Newest)</option>
+        <option value="year-asc">📅 Year (Oldest)</option>
+      </select>
+    </div>
+
     <div class="filters">
       <div class="chip active" onclick="setFilter('ALL', this)" data-key="all">All</div>
       <div class="chip" onclick="setFilter('Vinyl (LP)', this)">Vinyl (LP)</div>
@@ -173,7 +191,7 @@
   </header>
 
   <main id="gridContainer" class="grid">
-    <div class="loader" id="loadingText">Loading collection from GitHub...</div>
+    <div class="loader" id="loadingText">Loading library...</div>
   </main>
 
   <button class="fab" id="fabBtn" onclick="openScannerModal()">
@@ -329,7 +347,7 @@
         notesPlaceholder: "Add personal notes...",
         saveChanges: "💾 Save Changes",
         deleteBtn: "🗑️ Delete",
-        deleteConfirm: "DO you want to delete this album from your library?"
+        deleteConfirm: "Do you want to delete this album from your library?"
       },
       es: {
         title: "📀 Mi Biblioteca",
@@ -393,7 +411,7 @@
         banner.classList.add("show");
       } else if (deferredInstallPrompt) {
         textEl.innerText = currentLang === "es"
-          ? "📲 Instala esta app en tu pantalla de inicio"
+          ? "📲 Instala la app en tu pantalla de inicio"
           : "📲 Install this app on your home screen";
         btnEl.innerText = currentLang === "es" ? "Instalar" : "Install";
         btnEl.style.display = "inline-block";
@@ -524,6 +542,7 @@
 
     function renderGrid() {
       const q = document.getElementById("searchInput").value.toLowerCase().trim();
+      const sortMode = document.getElementById("sortSelect").value;
       const container = document.getElementById("gridContainer");
 
       const filteredIndices = [];
@@ -538,6 +557,25 @@
         if (matchesFormat && matchesQuery) {
           filteredIndices.push({ item, index });
         }
+      });
+
+      // Ordenar resultados según el criterio seleccionado
+      filteredIndices.sort((a, b) => {
+        const itemA = a.item;
+        const itemB = b.item;
+
+        if (sortMode === "artist-asc") {
+          return (itemA.artist || "").localeCompare(itemB.artist || "");
+        } else if (sortMode === "artist-desc") {
+          return (itemB.artist || "").localeCompare(itemA.artist || "");
+        } else if (sortMode === "title-asc") {
+          return (itemA.title || "").localeCompare(itemB.title || "");
+        } else if (sortMode === "year-desc") {
+          return parseInt(itemB.year || 0) - parseInt(itemA.year || 0);
+        } else if (sortMode === "year-asc") {
+          return parseInt(itemA.year || 0) - parseInt(itemB.year || 0);
+        }
+        return 0;
       });
 
       if (filteredIndices.length === 0) {
