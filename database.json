@@ -1,5 +1,16 @@
 [
   {
+    "barcode": "602498688533",
+    "artist": "Michael McDonald",
+    "title": "Motown Two",
+    "format": "SACD",
+    "year": "2004",
+    "genre": "Rock, Funk / Soul",
+    "notes": "",
+    "coverUrl": "https://is1-ssl.mzstatic.com/image/thumb/Music128/v4/5d/08/31/5d08313a-c572-c475-4729-e165ab0f263b/00602498678947.rgb.jpg/600x600bb.jpg",
+    "timestamp": 1794647957135
+  },
+  {
     "barcode": "827969356425",
     "artist": "John Mayer",
     "title": "Room for Squares",
