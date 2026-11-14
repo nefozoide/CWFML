@@ -1,5 +1,16 @@
 [
   {
+    "barcode": "602498607626",
+    "artist": "Marvin Gaye",
+    "title": "The Marvin Gaye Collection",
+    "format": "CD",
+    "year": "2003",
+    "genre": "",
+    "notes": "",
+    "coverUrl": "http://coverartarchive.org/release/77920b79-1c4a-357e-a13f-a4909d571e90/26097513305-500.jpg",
+    "timestamp": 1794637658324
+  },
+  {
     "barcode": "84356319954",
     "artist": "Mac Ayres",
     "title": "Magic 8Ball",
