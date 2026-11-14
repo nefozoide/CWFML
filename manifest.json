@@ -1,6 +1,6 @@
 {
   "name": "💽 CWF Music",
-  "short_name": "💽 Manager",
+  "short_name": "💽 CWF",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0f1115",
