@@ -1,5 +1,16 @@
 [
   {
+    "barcode": "4988031778302",
+    "artist": "Paul McCartney",
+    "title": "Flaming Pie",
+    "format": "SHM-CD",
+    "year": "2025",
+    "genre": "rock, pop",
+    "notes": "",
+    "coverUrl": "https://coverartarchive.org/release/1c391212-6379-4bf1-94d7-1610248aede4/43530998576-500.jpg",
+    "timestamp": 1794650375665
+  },
+  {
     "barcode": "4988031778296",
     "artist": "Paul McCartney",
     "title": "Paul Is Live",
