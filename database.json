@@ -1,5 +1,16 @@
 [
   {
+    "barcode": "743212571721",
+    "artist": "Annie Lennox",
+    "title": "Medusa",
+    "format": "CD",
+    "year": "1995",
+    "genre": "",
+    "notes": "",
+    "coverUrl": "http://coverartarchive.org/release/3c5a545e-b8c0-4249-a546-adc1c17a60c7/5276884611.jpg",
+    "timestamp": 1794647067196
+  },
+  {
     "barcode": "886976482626",
     "artist": "Marsha Ambrosius",
     "title": "Late Nights & Early Mornings",
