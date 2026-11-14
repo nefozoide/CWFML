@@ -60,7 +60,6 @@
     .btn-small { background: var(--card); border: 1px solid var(--border); color: var(--muted); padding: 4px 8px; border-radius: 8px; font-size: 0.72rem; cursor: pointer; height: 26px; display: flex; align-items: center; }
     .badge-count { background: var(--card); border: 1px solid var(--border); padding: 2px 8px; border-radius: 999px; font-size: 0.75rem; color: var(--muted); white-space: nowrap; height: 26px; display: flex; align-items: center; }
 
-    /* Controles superiores ajustados al 100% sin scroll horizontal */
     .search-controls { display: flex; gap: 6px; margin-bottom: 10px; width: 100%; }
     .search-box {
       flex: 1; min-width: 0; padding: 9px 12px; border-radius: 10px;
@@ -415,27 +414,22 @@
       setupBackButtonBehavior();
     };
 
-    // 1. Manejo del botón "Atrás" del navegador/teléfono
+    // Manejo seguro del botón "Atrás" sin bucles infinitos
     function setupBackButtonBehavior() {
-      history.pushState({ page: 'home' }, '');
       window.addEventListener('popstate', (e) => {
         const scannerModal = document.getElementById("scannerModal");
         const detailModal = document.getElementById("detailModal");
         const searchInput = document.getElementById("searchInput");
 
         if (scannerModal.classList.contains("open")) {
-          closeScanner();
-          history.pushState({ page: 'home' }, '');
+          scannerModal.classList.remove("open");
+          document.getElementById("manualForm").classList.remove("active");
         } else if (detailModal.classList.contains("open")) {
-          closeDetailModal();
-          history.pushState({ page: 'home' }, '');
+          detailModal.classList.remove("open");
+          selectedAlbumIndex = null;
         } else if (searchInput.value.trim() !== "") {
           searchInput.value = "";
           renderGrid();
-          history.pushState({ page: 'home' }, '');
-        } else {
-          // Permite cerrar la app tras 2-3 toques si no hay modales abiertos
-          history.back();
         }
       });
     }
@@ -525,7 +519,6 @@
       document.getElementById("lblEditBarcode").innerText = t.lblEditBarcode;
       document.getElementById("editNotes").placeholder = t.notesPlaceholder;
 
-      // Textos del selector de orden
       document.getElementById("optDateDesc").innerText = t.optDateDesc;
       document.getElementById("optDateAsc").innerText = t.optDateAsc;
       document.getElementById("optArtistAsc").innerText = t.optArtistAsc;
@@ -618,7 +611,6 @@
         }
       });
 
-      // 3. Lógica de ordenamiento (incluyendo por timestamp de fecha de adición)
       filteredIndices.sort((a, b) => {
         const itemA = a.item;
         const itemB = b.item;
@@ -681,7 +673,7 @@
       document.getElementById("editFormat").value = album.format || "CD";
       document.getElementById("editYear").value = album.year || "";
       document.getElementById("editGenre").value = album.genre || "";
-      document.getElementById("editCoverUrl").value = album.coverUrl || ""; // 4. Campo para corregir carátula
+      document.getElementById("editCoverUrl").value = album.coverUrl || "";
       document.getElementById("editNotes").value = album.notes || "";
       document.getElementById("editBarcode").value = album.barcode || "";
 
@@ -704,7 +696,7 @@
       const format = document.getElementById("editFormat").value;
       const year = document.getElementById("editYear").value.trim();
       const genre = document.getElementById("editGenre").value.trim();
-      const coverUrl = document.getElementById("editCoverUrl").value.trim(); // 4. Captura carátula corregida
+      const coverUrl = document.getElementById("editCoverUrl").value.trim();
       const notes = document.getElementById("editNotes").value.trim();
 
       if (!artist || !title) {
@@ -732,7 +724,7 @@
           currentContent[selectedAlbumIndex].format = format;
           currentContent[selectedAlbumIndex].year = year;
           currentContent[selectedAlbumIndex].genre = genre;
-          currentContent[selectedAlbumIndex].coverUrl = coverUrl; // 4. Actualiza carátula
+          currentContent[selectedAlbumIndex].coverUrl = coverUrl;
           currentContent[selectedAlbumIndex].notes = notes;
         }
 
@@ -918,7 +910,7 @@
           genre: meta.genre || "",
           notes: "",
           coverUrl: meta.coverUrl,
-          timestamp: Date.now() // 3. Timestamp único de adición
+          timestamp: Date.now()
         };
 
         await saveAlbumToGitHub(newAlbum);
@@ -929,7 +921,6 @@
           : `<strong>✅ Done!</strong><br>${meta.artist} – <i>${meta.title}</i> (${meta.format})`;
         await loadCollection();
 
-        // 2. Cierre automático del modal tras 1.2 segundos para que se vea el mensaje de éxito
         setTimeout(() => {
           closeScanner();
         }, 1200);
@@ -1078,7 +1069,7 @@
         genre: "", 
         notes: "", 
         coverUrl, 
-        timestamp: Date.now() // 3. Timestamp único de adición
+        timestamp: Date.now()
       };
 
       try {
@@ -1090,7 +1081,6 @@
         document.getElementById("manualForm").classList.remove("active");
         await loadCollection();
 
-        // 2. Cierre automático del modal tras 1.2 segundos
         setTimeout(() => {
           closeScanner();
         }, 1200);
