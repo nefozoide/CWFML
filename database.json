@@ -1,5 +1,16 @@
 [
   {
+    "barcode": "600753809105",
+    "artist": "Paul McCartney",
+    "title": "McCartney",
+    "format": "CD",
+    "year": "2024",
+    "genre": "Rock, Pop",
+    "notes": "",
+    "coverUrl": "https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/d0/c2/3a/d0c23a55-62be-45b8-5888-a5881e817ac1/14CMGIM01185.rgb.jpg/600x600bb.jpg",
+    "timestamp": 1794650466325
+  },
+  {
     "barcode": "4988031762745",
     "artist": "Paul McCartney",
     "title": "McCartney II",
