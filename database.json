@@ -1,5 +1,16 @@
 [
   {
+    "barcode": "821797225168",
+    "artist": "Michael Jackson",
+    "title": "Thriller",
+    "format": "SACD",
+    "year": "2022",
+    "genre": "Rock, Funk / Soul, Pop",
+    "notes": "",
+    "coverUrl": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/32/4f/fd/324ffda2-9e51-8f6a-0c2d-c6fd2b41ac55/074643811224.jpg/600x600bb.jpg",
+    "timestamp": 1794648974894
+  },
+  {
     "barcode": "821797228169",
     "artist": "Alanis Morissette",
     "title": "Jagged Little Pill",
