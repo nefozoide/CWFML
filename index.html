@@ -859,6 +859,11 @@
           : `<strong>✅ Done!</strong><br>${meta.artist} – <i>${meta.title}</i> (${meta.format})`;
         await loadCollection();
 
+        // Cierre automático del modal de registro tras 1.2 segundos de éxito
+        setTimeout(() => {
+          closeScanner();
+        }, 1200);
+
       } catch (err) {
         if (err && err.isDuplicate) {
           showDuplicateAlert(resBox, err.existingAlbum);
@@ -1004,6 +1009,12 @@
           : `<strong>✅ Saved successfully!</strong><br>${artist} – <i>${title}</i>`;
         document.getElementById("manualForm").classList.remove("active");
         await loadCollection();
+
+        // Cierre automático del modal de registro tras 1.2 segundos de éxito
+        setTimeout(() => {
+          closeScanner();
+        }, 1200);
+
       } catch (err) {
         if (err && err.isDuplicate) {
           showDuplicateAlert(resBox, err.existingAlbum);
