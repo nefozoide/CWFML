@@ -1,5 +1,16 @@
 [
   {
+    "barcode": "028947062028",
+    "artist": "Andrea Bocelli",
+    "title": "Sentimento",
+    "format": "SACD",
+    "year": "2002",
+    "genre": "Classical",
+    "notes": "",
+    "coverUrl": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/3d/40/c3/3d40c395-9c1d-a83a-1c4a-03756cf213e3/18UMGIM31315.rgb.jpg/600x600bb.jpg",
+    "timestamp": 1794648319659
+  },
+  {
     "barcode": "4988031321836",
     "artist": "Queen",
     "title": "Greatest Hits",
