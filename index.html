@@ -108,17 +108,19 @@
 
     .detail-cover { width: 100%; aspect-ratio: 1/1; border-radius: 12px; overflow: hidden; background: #232732; margin-bottom: 14px; display: flex; align-items: center; justify-content: center; }
     .detail-cover img { width: 100%; height: 100%; object-fit: cover; }
-    .detail-info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; align-items: center; }
-    .detail-label { color: var(--muted); font-weight: 600; }
-    .detail-value { font-weight: 700; text-align: right; }
     
+    .edit-field-group { margin-bottom: 10px; }
+    .edit-field-group label { font-size: 0.78rem; color: var(--muted); display: block; margin-bottom: 3px; }
+    .edit-input, .edit-select { width: 100%; padding: 10px; border-radius: 10px; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-size: 0.9rem; outline: none; }
+    .edit-input:focus, .edit-select:focus { border-color: var(--accent); }
+
     .notes-textarea {
       width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text);
-      border-radius: 10px; padding: 10px; font-size: 0.9rem; margin-top: 6px; resize: vertical; min-height: 70px; outline: none;
+      border-radius: 10px; padding: 10px; font-size: 0.9rem; resize: vertical; min-height: 60px; outline: none;
     }
     .notes-textarea:focus { border-color: var(--accent); }
 
-    .btn-danger { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid var(--danger); border-radius: 10px; padding: 12px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 10px; }
+    .btn-danger { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid var(--danger); border-radius: 10px; padding: 12px; font-weight: 700; cursor: pointer; width: 100%; }
     .btn-actions-group { display: flex; gap: 8px; margin-top: 15px; }
 
     .manual-row { display: flex; gap: 8px; margin-top: 10px; }
@@ -134,7 +136,6 @@
     .loader { text-align: center; padding: 40px; color: var(--muted); grid-column: 1 / -1; }
     .form-group { margin-top: 12px; display: none; }
     .form-group.active { display: block; }
-    label { font-size: 0.78rem; color: var(--muted); display: block; margin-bottom: 4px; }
   </style>
 </head>
 <body>
@@ -181,7 +182,7 @@
 
   <input type="file" id="barcodeInputFile" accept="image/*" capture="environment" style="display:none;" onchange="handleBarcodeInput(event)">
 
-  <!-- Modal del Escáner / Registro -->
+  <!-- Modal de Registro -->
   <div class="modal-backdrop" id="scannerModal">
     <div class="modal">
       <div class="modal-header">
@@ -227,49 +228,71 @@
     </div>
   </div>
 
-  <!-- Modal de Detalles y Notas del Álbum -->
+  <!-- Modal de Edición Completa y Detalles -->
   <div class="modal-backdrop" id="detailModal">
     <div class="modal">
       <div class="modal-header">
-        <h3 id="detailModalTitle">Album Details</h3>
+        <h3 id="detailModalTitle">Album Details & Edit</h3>
         <button class="close-btn" onclick="closeDetailModal()">✕</button>
       </div>
       <div class="detail-cover" id="detailCoverWrap">
         <div class="no-cover">💿</div>
       </div>
-      <div class="detail-info-row">
-        <span class="detail-label" id="lblDetailArtist">Artist</span>
-        <span class="detail-value" id="detailArtist">-</span>
-      </div>
-      <div class="detail-info-row">
-        <span class="detail-label" id="lblDetailTitle">Title</span>
-        <span class="detail-value" id="detailTitle">-</span>
-      </div>
-      <div class="detail-info-row">
-        <span class="detail-label" id="lblDetailFormat">Format</span>
-        <span class="detail-value" id="detailFormat">-</span>
-      </div>
-      <div class="detail-info-row">
-        <span class="detail-label" id="lblDetailYear">Year</span>
-        <span class="detail-value" id="detailYear">-</span>
-      </div>
-      <div class="detail-info-row">
-        <span class="detail-label" id="lblDetailGenre">Genre</span>
-        <span class="detail-value" id="detailGenre">-</span>
-      </div>
-      <div class="detail-info-row" style="border-bottom: none;">
-        <span class="detail-label" id="lblDetailBarcode">Barcode</span>
-        <span class="detail-value" id="detailBarcode">-</span>
+
+      <div class="edit-field-group">
+        <label id="lblEditArtist">Artist</label>
+        <input type="text" id="editArtist" class="edit-input" />
       </div>
 
-      <!-- Cuadro de texto de Notas -->
-      <div style="margin-top: 12px;">
-        <label id="lblNotesTitle" style="font-weight: 600; color: var(--muted); margin-bottom: 4px;">Notes / Custom Genre:</label>
-        <textarea id="detailNotes" class="notes-textarea" placeholder="Add personal notes, correct genre, state of the disc..."></textarea>
+      <div class="edit-field-group">
+        <label id="lblEditTitle">Title</label>
+        <input type="text" id="editTitle" class="edit-input" />
+      </div>
+
+      <div class="edit-field-group">
+        <label id="lblEditFormat">Format</label>
+        <select id="editFormat" class="edit-select">
+          <option value="CD">CD</option>
+          <option value="Vinyl (LP)">Vinyl (LP)</option>
+          <option value="Blu-ray">Blu-ray</option>
+          <option value="SACD">SACD</option>
+          <option value="Box Set">Box Set</option>
+        </select>
+      </div>
+
+      <div class="edit-field-group">
+        <label id="lblEditYear">Year</label>
+        <input type="tel" id="editYear" class="edit-input" />
+      </div>
+
+      <div class="edit-field-group">
+        <label id="lblEditGenre">Genre</label>
+        <select id="editGenre" class="edit-select">
+          <option value="">(Unspecified / Sin especificar)</option>
+          <option value="Rock">Rock</option>
+          <option value="Pop">Pop</option>
+          <option value="Electronic, Funk / Soul">Electronic, Funk / Soul</option>
+          <option value="Jazz">Jazz</option>
+          <option value="Classical">Classical</option>
+          <option value="Hip Hop">Hip Hop</option>
+          <option value="Soundtrack">Soundtrack</option>
+          <option value="Blues">Blues</option>
+          <option value="Metal">Metal</option>
+        </select>
+      </div>
+
+      <div class="edit-field-group">
+        <label id="lblEditNotes">Notes / Personal Remarks</label>
+        <textarea id="editNotes" class="notes-textarea" placeholder="Add personal notes..."></textarea>
+      </div>
+
+      <div class="edit-field-group">
+        <label id="lblEditBarcode">Barcode</label>
+        <input type="text" id="editBarcode" class="edit-input" style="opacity: 0.7;" readonly />
       </div>
 
       <div class="btn-actions-group">
-        <button class="btn-primary" id="btnSaveNotes" onclick="saveAlbumNotes()" style="margin-top:0;">💾 Save Notes</button>
+        <button class="btn-primary" id="btnSaveAlbumChanges" onclick="saveAlbumChanges()" style="margin-top:0;">💾 Save Changes</button>
         <button class="btn-danger" id="btnDeleteAlbum" onclick="deleteCurrentAlbum()" style="margin-top:0;">🗑️ Delete</button>
       </div>
     </div>
@@ -297,7 +320,7 @@
         errorLoad: "Could not load database from GitHub.",
         total: "titles",
         modalTitle: "Record Registration",
-        detailTitle: "Album Details",
+        detailTitle: "Album Details & Edit",
         warning: "⚠️ Not found in databases. Complete details:",
         artist: "Artist:",
         albumTitle: "Album Title:",
@@ -307,15 +330,15 @@
         save: "Save to GitHub",
         search: "Search",
         enterBarcode: "Enter barcode digits...",
-        lblArtist: "Artist",
-        lblTitle: "Title",
-        lblFormat: "Format",
-        lblYear: "Year",
-        lblGenre: "Genre",
-        lblBarcode: "Barcode",
-        lblNotes: "Notes / Custom Genre:",
-        notesPlaceholder: "Add personal notes, correct genre, state of the disc...",
-        saveNotes: "💾 Save Notes",
+        lblEditArtist: "Artist",
+        lblEditTitle: "Title",
+        lblEditFormat: "Format",
+        lblEditYear: "Year",
+        lblEditGenre: "Genre",
+        lblEditNotes: "Notes / Personal Remarks",
+        lblEditBarcode: "Barcode",
+        notesPlaceholder: "Add personal notes...",
+        saveChanges: "💾 Save Changes",
         deleteBtn: "🗑️ Delete",
         deleteConfirm: "Are you sure you want to delete this album from GitHub?"
       },
@@ -327,7 +350,7 @@
         errorLoad: "No se pudo cargar la base de datos de GitHub.",
         total: "títulos",
         modalTitle: "Registro de Discos",
-        detailTitle: "Detalles del Álbum",
+        detailTitle: "Detalles y Edición del Álbum",
         warning: "⚠️ No registrado en bases de datos. Completa:",
         artist: "Artista:",
         albumTitle: "Título del Álbum:",
@@ -337,15 +360,15 @@
         save: "Guardar en GitHub",
         search: "Buscar",
         enterBarcode: "Escribe el código de barras...",
-        lblArtist: "Artista",
-        lblTitle: "Título",
-        lblFormat: "Formato",
-        lblYear: "Año",
-        lblGenre: "Género",
-        lblBarcode: "Código de barras",
-        lblNotes: "Notas / Género personalizado:",
-        notesPlaceholder: "Añade notas personales, corrige el género, estado del disco...",
-        saveNotes: "💾 Guardar Notas",
+        lblEditArtist: "Artista",
+        lblEditTitle: "Título",
+        lblEditFormat: "Formato",
+        lblEditYear: "Año",
+        lblEditGenre: "Género",
+        lblEditNotes: "Notas / Comentarios personales",
+        lblEditBarcode: "Código de barras",
+        notesPlaceholder: "Añade notas personales...",
+        saveChanges: "💾 Guardar Cambios",
         deleteBtn: "🗑️ Eliminar",
         deleteConfirm: "¿Estás seguro de que deseas eliminar este álbum de GitHub?"
       }
@@ -434,16 +457,16 @@
       document.getElementById("btnSaveGithub").innerText = t.save;
       document.getElementById("btnManualSearch").innerText = t.search;
       document.getElementById("btnDeleteAlbum").innerText = t.deleteBtn;
-      document.getElementById("btnSaveNotes").innerText = t.saveNotes;
-      document.getElementById("lblNotesTitle").innerText = t.lblNotes;
-      document.getElementById("detailNotes").placeholder = t.notesPlaceholder;
+      document.getElementById("btnSaveAlbumChanges").innerText = t.saveChanges;
       
-      document.getElementById("lblDetailArtist").innerText = t.lblArtist;
-      document.getElementById("lblDetailTitle").innerText = t.lblTitle;
-      document.getElementById("lblDetailFormat").innerText = t.lblFormat;
-      document.getElementById("lblDetailYear").innerText = t.lblYear;
-      document.getElementById("lblDetailGenre").innerText = t.lblGenre;
-      document.getElementById("lblDetailBarcode").innerText = t.lblBarcode;
+      document.getElementById("lblEditArtist").innerText = t.lblEditArtist;
+      document.getElementById("lblEditTitle").innerText = t.lblEditTitle;
+      document.getElementById("lblEditFormat").innerText = t.lblEditFormat;
+      document.getElementById("lblEditYear").innerText = t.lblEditYear;
+      document.getElementById("lblEditGenre").innerText = t.lblEditGenre;
+      document.getElementById("lblEditNotes").innerText = t.lblEditNotes;
+      document.getElementById("lblEditBarcode").innerText = t.lblEditBarcode;
+      document.getElementById("editNotes").placeholder = t.notesPlaceholder;
 
       document.getElementById("configBtn").innerText = currentLang === "es" ? "⚙️ Config" : "⚙️ Setup";
       document.getElementById("manualBarcode").placeholder = t.enterBarcode;
@@ -544,7 +567,7 @@
             <div class="artist">${item.artist}</div>
             <div class="meta-row">
               <span class="year">${item.year || ""}</span>
-              <span class="genre">${item.notes || item.genre || ""}</span>
+              <span class="genre">${item.genre || item.notes || ""}</span>
             </div>
           </div>
         </div>
@@ -563,13 +586,13 @@
         coverWrap.innerHTML = `<div class="no-cover">💿</div>`;
       }
 
-      document.getElementById("detailArtist").innerText = album.artist || "-";
-      document.getElementById("detailTitle").innerText = album.title || "-";
-      document.getElementById("detailFormat").innerText = album.format || "-";
-      document.getElementById("detailYear").innerText = album.year || "-";
-      document.getElementById("detailGenre").innerText = album.genre || (currentLang === 'es' ? "No especificado" : "Unspecified");
-      document.getElementById("detailBarcode").innerText = album.barcode || "-";
-      document.getElementById("detailNotes").value = album.notes || "";
+      document.getElementById("editArtist").value = album.artist || "";
+      document.getElementById("editTitle").value = album.title || "";
+      document.getElementById("editFormat").value = album.format || "CD";
+      document.getElementById("editYear").value = album.year || "";
+      document.getElementById("editGenre").value = album.genre || "";
+      document.getElementById("editNotes").value = album.notes || "";
+      document.getElementById("editBarcode").value = album.barcode || "";
 
       document.getElementById("detailModal").classList.add("open");
     }
@@ -579,14 +602,25 @@
       selectedAlbumIndex = null;
     }
 
-    async function saveAlbumNotes() {
+    async function saveAlbumChanges() {
       if (selectedAlbumIndex === null) return;
       const token = getToken();
       if (!token) { setupToken(); return; }
 
-      const newNotes = document.getElementById("detailNotes").value.trim();
+      const artist = document.getElementById("editArtist").value.trim();
+      const title = document.getElementById("editTitle").value.trim();
+      const format = document.getElementById("editFormat").value;
+      const year = document.getElementById("editYear").value.trim();
+      const genre = document.getElementById("editGenre").value;
+      const notes = document.getElementById("editNotes").value.trim();
+
+      if (!artist || !title) {
+        alert(currentLang === 'es' ? "Artista y Título son obligatorios." : "Artist and Title are required.");
+        return;
+      }
+
       const apiUrl = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${FILE_PATH}`;
-      const saveBtn = document.getElementById("btnSaveNotes");
+      const saveBtn = document.getElementById("btnSaveAlbumChanges");
       saveBtn.disabled = true;
 
       try {
@@ -599,9 +633,13 @@
         
         let currentContent = JSON.parse(decodeURIComponent(escape(atob(fileData.content)))) || [];
         
-        // Actualizar notas del álbum correspondiente
         if (currentContent[selectedAlbumIndex]) {
-          currentContent[selectedAlbumIndex].notes = newNotes;
+          currentContent[selectedAlbumIndex].artist = artist;
+          currentContent[selectedAlbumIndex].title = title;
+          currentContent[selectedAlbumIndex].format = format;
+          currentContent[selectedAlbumIndex].year = year;
+          currentContent[selectedAlbumIndex].genre = genre;
+          currentContent[selectedAlbumIndex].notes = notes;
         }
 
         const updatedContentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(currentContent, null, 2))));
@@ -610,7 +648,7 @@
           method: "PUT",
           headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" },
           body: JSON.stringify({
-            message: `Update notes for: ${currentContent[selectedAlbumIndex].artist} - ${currentContent[selectedAlbumIndex].title}`,
+            message: `Update album details: ${artist} - ${title}`,
             content: updatedContentBase64,
             sha: fileData.sha
           })
@@ -623,7 +661,7 @@
         await loadCollection();
       } catch (err) {
         saveBtn.disabled = false;
-        alert(currentLang === 'es' ? "Error al guardar las notas." : "Error saving notes.");
+        alert(currentLang === 'es' ? "Error al guardar los cambios." : "Error saving changes.");
       }
     }
 
