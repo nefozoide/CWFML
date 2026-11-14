@@ -1,5 +1,16 @@
 [
   {
+    "barcode": "828767617466",
+    "artist": "John Mayer",
+    "title": "Room for Squares",
+    "format": "SACD",
+    "year": "2001",
+    "genre": "",
+    "notes": "",
+    "coverUrl": "http://coverartarchive.org/release/fc9a1b8e-5fc7-4b18-ab20-d5d6536dc0aa/15852460994.jpg",
+    "timestamp": 1794648463347
+  },
+  {
     "barcode": "199806608678",
     "artist": "Jill Scott",
     "title": "To Whom This May Concern",
