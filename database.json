@@ -1,5 +1,16 @@
 [
   {
+    "barcode": "827969088722",
+    "artist": "Miles Davis",
+    "title": "Kind of Blue",
+    "format": "CD",
+    "year": "2004",
+    "genre": "",
+    "notes": "",
+    "coverUrl": "http://coverartarchive.org/release/e8324f18-31cd-4a2f-877b-08affdccfff1/10359509813.jpg",
+    "timestamp": 1794642577655
+  },
+  {
     "barcode": "602498842577",
     "artist": "Bon Jovi",
     "title": "Slippery When Wet",
