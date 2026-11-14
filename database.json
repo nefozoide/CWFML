@@ -1,5 +1,16 @@
 [
   {
+    "barcode": "044006346724",
+    "artist": "Mariah Carey",
+    "title": "Charmbracelet",
+    "format": "CD",
+    "year": "2002",
+    "genre": "",
+    "notes": "",
+    "coverUrl": "http://coverartarchive.org/release/4ef71933-1ff5-46f2-aa7d-1b8ff3ffbd10/1637741562.jpg",
+    "timestamp": 1794645258191
+  },
+  {
     "barcode": "075596284721",
     "artist": "Tamia",
     "title": "More",
