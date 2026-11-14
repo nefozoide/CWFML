@@ -1,5 +1,16 @@
 [
   {
+    "barcode": "4988031778296",
+    "artist": "Paul McCartney",
+    "title": "Paul Is Live",
+    "format": "CD",
+    "year": "2025",
+    "genre": "Rock, Pop",
+    "notes": "",
+    "coverUrl": "https://is1-ssl.mzstatic.com/image/thumb/Music113/v4/9f/9c/de/9f9cde2d-b761-1425-d0bf-02448a1bfdbc/19UMGIM38097.rgb.jpg/600x600bb.jpg",
+    "timestamp": 1794650348790
+  },
+  {
     "barcode": "4988031778319",
     "artist": "Paul McCartney",
     "title": "Chaos and Creation in the Backyard",
