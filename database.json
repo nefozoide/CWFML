@@ -1,5 +1,16 @@
 [
   {
+    "barcode": "078221903721",
+    "artist": "Whitney Houston",
+    "title": "My Love Is Your Love",
+    "format": "CD",
+    "year": "1998",
+    "genre": "pop, soul",
+    "notes": "",
+    "coverUrl": "http://coverartarchive.org/release/958db8f7-3e9a-41ca-9346-3c2724311a7d/26882654377-500.jpg",
+    "timestamp": 1794650603403
+  },
+  {
     "barcode": "4988031796757",
     "artist": "Billie Eilish",
     "title": "Hit Me Hard And Soft",
