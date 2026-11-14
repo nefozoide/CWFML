@@ -62,7 +62,6 @@
     .btn-small { background: var(--card); border: 1px solid var(--border); color: var(--muted); padding: 4px 8px; border-radius: 8px; font-size: 0.72rem; cursor: pointer; height: 26px; display: flex; align-items: center; }
     .badge-count { background: var(--card); border: 1px solid var(--border); padding: 2px 8px; border-radius: 999px; font-size: 0.75rem; color: var(--muted); white-space: nowrap; height: 26px; display: flex; align-items: center; }
 
-    /* Controles de búsqueda ajustados para evitar desbordamiento horizontal */
     .search-controls { display: flex; gap: 6px; margin-bottom: 10px; width: 100%; }
     .search-box {
       flex: 1; min-width: 0; padding: 9px 12px; border-radius: 10px;
@@ -203,6 +202,8 @@
   </button>
 
   <input type="file" id="barcodeInputFile" accept="image/*" capture="environment" style="display:none;" onchange="handleBarcodeInput(event)">
+  <!-- Input oculto para subir foto de portada personalizada -->
+  <input type="file" id="customCoverFile" accept="image/*" style="display:none;" onchange="handleCustomCoverInput(event)">
 
   <!-- Modal de Registro -->
   <div class="modal-backdrop" id="scannerModal">
@@ -243,6 +244,14 @@
         </select>
         <label style="margin-top: 6px;" id="lblYear">Year:</label>
         <input type="tel" id="mYear" placeholder="e.g. 1976" />
+        
+        <!-- Opción de buscar/subir foto de portada física -->
+        <label style="margin-top: 6px;" id="lblCustomCover">Physical Cover Photo (Fix cover match):</label>
+        <div style="display: flex; gap: 6px; margin-top: 4px; align-items: center;">
+          <button type="button" class="btn-secondary" style="margin-top:0; font-size:0.78rem;" onclick="document.getElementById('customCoverFile').click()" id="btnUploadCover">📷 Upload / Take Photo</button>
+          <span id="coverStatusText" style="font-size: 0.72rem; color: var(--muted);">Default online cover</span>
+        </div>
+
         <label style="margin-top: 6px;" id="lblCover">Cover URL (Optional):</label>
         <input type="text" id="mCover" placeholder="https://..." />
         <button class="btn-primary" id="btnSaveGithub" onclick="saveManualAlbum()">Save to library</button>
@@ -293,6 +302,14 @@
       </div>
 
       <div class="edit-field-group">
+        <label id="lblEditCoverUrl">Cover URL or Custom Picture</label>
+        <div style="display: flex; gap: 6px;">
+          <input type="text" id="editCoverUrl" class="edit-input" placeholder="Image URL..." />
+          <button type="button" class="btn-secondary" style="width: auto; margin-top:0; font-size:0.75rem; white-space:nowrap;" onclick="document.getElementById('customCoverFile').click()">📷 Photo</button>
+        </div>
+      </div>
+
+      <div class="edit-field-group">
         <label id="lblEditNotes">Notes / Personal Remarks</label>
         <textarea id="editNotes" class="notes-textarea" placeholder="Add personal notes..."></textarea>
       </div>
@@ -321,6 +338,7 @@
     let isProcessing = false;
     let deferredInstallPrompt = null;
     let selectedAlbumIndex = null;
+    let tempCustomCoverBase64 = ""; // Variable temporal para la portada personalizada en base64
 
     const translations = {
       en: {
@@ -346,6 +364,7 @@
         lblEditFormat: "Format",
         lblEditYear: "Year",
         lblEditGenre: "Genre",
+        lblEditCoverUrl: "Cover URL or Custom Picture",
         lblEditNotes: "Notes / Personal Remarks",
         lblEditBarcode: "Barcode",
         notesPlaceholder: "Add personal notes...",
@@ -353,7 +372,11 @@
         deleteBtn: "🗑️ Delete",
         deleteConfirm: "Do you want to delete this album from your library?",
         optDateDesc: "📅 Newest added",
-        optDateAsc: "📅 Oldest added"
+        optDateAsc: "📅 Oldest added",
+        lblCustomCover: "Physical Cover Photo (Fix cover match):",
+        btnUploadCover: "📷 Upload / Take Photo",
+        coverStatusDefault: "Default online cover",
+        coverStatusSet: "✅ Custom photo ready"
       },
       es: {
         title: "📀 Mi Biblioteca",
@@ -378,6 +401,7 @@
         lblEditFormat: "Formato",
         lblEditYear: "Año",
         lblEditGenre: "Género",
+        lblEditCoverUrl: "URL de Portada o Foto Personalizada",
         lblEditNotes: "Notas / Comentarios personales",
         lblEditBarcode: "Código de barras",
         notesPlaceholder: "Añade notas personales...",
@@ -385,7 +409,11 @@
         deleteBtn: "🗑️ Eliminar",
         deleteConfirm: "¿Quieres eliminar este álbum de tu biblioteca?",
         optDateDesc: "📅 Más recientes",
-        optDateAsc: "📅 Más antiguos"
+        optDateAsc: "📅 Más antiguos",
+        lblCustomCover: "Foto de Portada Física (Corregir carátula):",
+        btnUploadCover: "📷 Subir / Tomar Foto",
+        coverStatusDefault: "Portada online predeterminada",
+        coverStatusSet: "✅ Foto personalizada lista"
       }
     };
 
@@ -419,7 +447,7 @@
         banner.classList.add("show");
       } else if (deferredInstallPrompt) {
         textEl.innerText = currentLang === "es"
-          ? "📲 Instala esta app en tu pantalla de inicio"
+          ? "📲 Instala la app en tu pantalla de inicio"
           : "📲 Install this app on your home screen";
         btnEl.innerText = currentLang === "es" ? "Instalar" : "Install";
         btnEl.style.display = "inline-block";
@@ -479,9 +507,13 @@
       document.getElementById("lblEditFormat").innerText = t.lblEditFormat;
       document.getElementById("lblEditYear").innerText = t.lblEditYear;
       document.getElementById("lblEditGenre").innerText = t.lblEditGenre;
+      document.getElementById("lblEditCoverUrl").innerText = t.lblEditCoverUrl;
       document.getElementById("lblEditNotes").innerText = t.lblEditNotes;
       document.getElementById("lblEditBarcode").innerText = t.lblEditBarcode;
       document.getElementById("editNotes").placeholder = t.notesPlaceholder;
+      document.getElementById("lblCustomCover").innerText = t.lblCustomCover;
+      document.getElementById("btnUploadCover").innerText = t.btnUploadCover;
+      document.getElementById("coverStatusText").innerText = tempCustomCoverBase64 ? t.coverStatusSet : t.coverStatusDefault;
 
       document.getElementById("optDateDesc").innerText = t.optDateDesc;
       document.getElementById("optDateAsc").innerText = t.optDateAsc;
@@ -632,6 +664,7 @@
       document.getElementById("editFormat").value = album.format || "CD";
       document.getElementById("editYear").value = album.year || "";
       document.getElementById("editGenre").value = album.genre || "";
+      document.getElementById("editCoverUrl").value = album.coverUrl || "";
       document.getElementById("editNotes").value = album.notes || "";
       document.getElementById("editBarcode").value = album.barcode || "";
 
@@ -653,6 +686,7 @@
       const format = document.getElementById("editFormat").value;
       const year = document.getElementById("editYear").value.trim();
       const genre = document.getElementById("editGenre").value.trim();
+      const coverUrl = document.getElementById("editCoverUrl").value.trim();
       const notes = document.getElementById("editNotes").value.trim();
 
       if (!artist || !title) {
@@ -680,6 +714,7 @@
           currentContent[selectedAlbumIndex].format = format;
           currentContent[selectedAlbumIndex].year = year;
           currentContent[selectedAlbumIndex].genre = genre;
+          currentContent[selectedAlbumIndex].coverUrl = coverUrl;
           currentContent[selectedAlbumIndex].notes = notes;
         }
 
@@ -750,12 +785,14 @@
     }
 
     function openScannerModal() {
+      tempCustomCoverBase64 = ""; // Resetear foto personalizada al abrir
       document.getElementById("scannerOptions").style.display = "block";
       document.getElementById("manualInputContainer").style.display = "none";
       document.getElementById("manualBarcode").value = "";
       document.getElementById("scannerModal").classList.add("open");
       document.getElementById("scanResult").style.display = "none";
       document.getElementById("manualForm").classList.remove("active");
+      document.getElementById("coverStatusText").innerText = translations[currentLang].coverStatusDefault;
     }
 
     function closeScanner() {
@@ -767,6 +804,56 @@
       document.getElementById("scannerOptions").style.display = "none";
       document.getElementById("manualInputContainer").style.display = "block";
       document.getElementById("manualBarcode").focus();
+    }
+
+    // Manejar la subida o foto de la carátula personalizada
+    function handleCustomCoverInput(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        // Redimensionar imagen en un canvas para optimizar tamaño antes de convertir a Base64
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement("canvas");
+          const MAX_WIDTH = 600;
+          const MAX_HEIGHT = 600;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+
+          tempCustomCoverBase64 = canvas.toDataURL("image/jpeg", 0.85);
+
+          // Si estamos en el modal de registro manual
+          document.getElementById("mCover").value = tempCustomCoverBase64;
+          document.getElementById("coverStatusText").innerText = translations[currentLang].coverStatusSet;
+
+          // Si estamos en el modal de detalles abierto
+          if (selectedAlbumIndex !== null) {
+            document.getElementById("editCoverUrl").value = tempCustomCoverBase64;
+          }
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+      event.target.value = "";
     }
 
     async function handleBarcodeInput(event) {
@@ -1008,14 +1095,14 @@
       saveBtn.disabled = true;
 
       const resBox = document.getElementById("scanResult");
-      resBox.innerHTML = currentLang === 'es' ? "💾 Buscando portada y guardando..." : "💾 Finding cover & saving...";
+      resBox.innerHTML = currentLang === 'es' ? "💾 Guardando álbum..." : "💾 Saving album...";
 
       if (!coverUrl) {
         coverUrl = await lookupFallbackCover(artist, title);
       }
 
       const newAlbum = { 
-        barcode: scannedBarcodeCache, 
+        barcode: scannedBarcodeCache || "manual-" + Date.now(), 
         artist, 
         title, 
         format, 
@@ -1072,13 +1159,13 @@
       const strictDuplicate = currentContent.find(item => {
         const b1 = normalizeBarcode(item.barcode);
         const b2 = normalizeBarcode(newAlbum.barcode);
-        if (b1 && b2 && b1 === b2) return true;
+        if (b1 && b2 && b1 === b2 && !b1.startsWith("manual")) return true;
         return (item.artist.toLowerCase().trim() === newAlbum.artist.toLowerCase().trim() &&
                 item.title.toLowerCase().trim() === newAlbum.title.toLowerCase().trim() &&
                 item.format === newAlbum.format);
       });
 
-      if (strictDuplicate) {
+      if (strictDuplicate && !newAlbum.barcode.startsWith("manual")) {
         throw { isDuplicate: true, existingAlbum: strictDuplicate };
       }
 
