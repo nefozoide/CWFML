@@ -1,5 +1,16 @@
 [
   {
+    "barcode": "4988031778326",
+    "artist": "Paul McCartney",
+    "title": "New",
+    "format": "CD",
+    "year": "2025",
+    "genre": "Rock, Pop",
+    "notes": "",
+    "coverUrl": "https://is1-ssl.mzstatic.com/image/thumb/Music128/v4/61/97/2a/61972a9d-d4e6-8e34-e123-ced500740973/00888072348509.rgb.jpg/600x600bb.jpg",
+    "timestamp": 1794650307175
+  },
+  {
     "barcode": "4988031682623",
     "artist": "Wings",
     "title": "Wings Over America",
