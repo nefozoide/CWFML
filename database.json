@@ -1,5 +1,16 @@
 [
   {
+    "barcode": "602498614402",
+    "artist": "Shania Twain",
+    "title": "Up!",
+    "format": "DVD Audio",
+    "year": "2003",
+    "genre": "",
+    "notes": "",
+    "coverUrl": "http://coverartarchive.org/release/9f8d2e65-b7e2-4fb7-aa50-b95df11d80a3/8628906629.jpg",
+    "timestamp": 1794641448828
+  },
+  {
     "barcode": "724385412394",
     "artist": "Cassandra Wilson",
     "title": "Traveling Miles",
