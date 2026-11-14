@@ -6,6 +6,10 @@
   <meta name="theme-color" content="#0f1115" />
   <title>Record Collection</title>
   <link rel="manifest" href="manifest.json" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Records" />
+  <link rel="apple-touch-icon" href="https://play-lh.googleusercontent.com/L-NOoF7qLgO3m-pP-A7IF1X2AiCSyL2iF_AOv9rNqFjQWBznDtFXjDrtujXEJa9NfPaNOXLR7inEQ_QuFfZd-QQ=s192" />
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <style>
     :root {
@@ -25,6 +29,21 @@
       letter-spacing: -0.01em; animation: fadeIn 0.8s ease-in-out;
     }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+    .install-banner {
+      display: none; background: rgba(29, 185, 84, 0.14); border: 1px solid var(--accent);
+      border-radius: 12px; padding: 10px 12px; margin-bottom: 12px;
+      align-items: center; justify-content: space-between; gap: 10px; font-size: 0.82rem;
+    }
+    .install-banner.show { display: flex; }
+    .install-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    .btn-install-now {
+      background: var(--accent); color: #000; border: none; border-radius: 8px;
+      padding: 6px 10px; font-weight: 700; font-size: 0.78rem; cursor: pointer;
+    }
+    .btn-dismiss-install {
+      background: none; border: none; color: var(--muted); font-size: 1.1rem; cursor: pointer; padding: 2px 4px;
+    }
 
     .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px; }
     h1 { font-size: 1.2rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -104,6 +123,15 @@
 
   <header>
     <div class="welcome-banner">Hey You! 👋</div>
+
+    <div id="installBanner" class="install-banner">
+      <span id="installText"></span>
+      <div class="install-actions">
+        <button id="btnInstallAction" class="btn-install-now" style="display:none;" onclick="triggerNativeInstall()">Install</button>
+        <button class="btn-dismiss-install" onclick="dismissInstallBanner()">✕</button>
+      </div>
+    </div>
+
     <div class="top-bar">
       <h1 id="appTitle">🎵 My Record Collection</h1>
       <div class="actions-group">
@@ -190,6 +218,7 @@
     let scannedBarcodeCache = "";
     let currentLang = localStorage.getItem("app_lang") || "en";
     let isProcessing = false;
+    let deferredInstallPrompt = null;
 
     const translations = {
       en: {
@@ -237,7 +266,57 @@
     window.onload = () => {
       applyLanguage();
       loadCollection();
+      initInstallPrompt();
     };
+
+    function isAppInstalled() {
+      return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+    }
+
+    function initInstallPrompt() {
+      if (isAppInstalled() || localStorage.getItem("hide_install_banner") === "1") return;
+
+      const banner = document.getElementById("installBanner");
+      const textEl = document.getElementById("installText");
+      const btnEl = document.getElementById("btnInstallAction");
+      const isIOS = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+
+      if (isIOS) {
+        textEl.innerHTML = currentLang === "es"
+          ? "📲 Instala esta app en tu iPhone: toca <b>Compartir (⬆️)</b> y luego <b>Agregar a inicio</b>."
+          : "📲 Install on iPhone: tap <b>Share (⬆️)</b> then <b>Add to Home Screen</b>.";
+        btnEl.style.display = "none";
+        banner.classList.add("show");
+      } else if (deferredInstallPrompt) {
+        textEl.innerText = currentLang === "es"
+          ? "📲 Instala la app en tu pantalla de inicio"
+          : "📲 Install app on your home screen";
+        btnEl.innerText = currentLang === "es" ? "Instalar" : "Install";
+        btnEl.style.display = "inline-block";
+        banner.classList.add("show");
+      }
+    }
+
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      initInstallPrompt();
+    });
+
+    async function triggerNativeInstall() {
+      if (!deferredInstallPrompt) return;
+      deferredInstallPrompt.prompt();
+      const { outcome } = await deferredInstallPrompt.userChoice;
+      if (outcome === "accepted") {
+        document.getElementById("installBanner").classList.remove("show");
+      }
+      deferredInstallPrompt = null;
+    }
+
+    function dismissInstallBanner() {
+      document.getElementById("installBanner").classList.remove("show");
+      localStorage.setItem("hide_install_banner", "1");
+    }
 
     function toggleLanguage() {
       currentLang = currentLang === "en" ? "es" : "en";
@@ -267,6 +346,8 @@
       
       const countEl = document.getElementById("totalCount");
       if (allAlbums.length >= 0) countEl.innerText = allAlbums.length + " " + t.total;
+
+      initInstallPrompt();
     }
 
     function normalizeBarcode(code) {
@@ -459,7 +540,6 @@
           return;
         }
 
-        // Si el álbum se encontró pero no tiene portada (como pasa con Discogs), buscar carátula en iTunes
         if (!meta.coverUrl) {
           meta.coverUrl = await lookupFallbackCover(meta.artist, meta.title);
         }
@@ -503,7 +583,6 @@
         : `<strong>⚠️ Already in collection!</strong><br>${album.artist} – <i>${album.title}</i> (${album.format})`;
     }
 
-    // Tercera fuente de respaldo solo para portadas en alta resolución (iTunes API gratuita)
     async function lookupFallbackCover(artist, title) {
       try {
         const query = encodeURIComponent(`${artist} ${title}`);
@@ -511,7 +590,6 @@
         if (!res.ok) return "";
         const data = await res.json();
         if (data.results && data.results.length > 0 && data.results[0].artworkUrl100) {
-          // Convierte la miniatura 100x100 a alta calidad 600x600
           return data.results[0].artworkUrl100.replace("100x100bb", "600x600bb");
         }
         return "";
@@ -615,7 +693,6 @@
       const resBox = document.getElementById("scanResult");
       resBox.innerHTML = currentLang === 'es' ? "💾 Buscando portada y guardando..." : "💾 Finding cover & saving...";
 
-      // Si el usuario dejó vacía la URL de portada en el formulario manual, intentar buscarla automáticamente
       if (!coverUrl) {
         coverUrl = await lookupFallbackCover(artist, title);
       }
