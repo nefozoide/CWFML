@@ -1,5 +1,16 @@
 [
   {
+    "barcode": "4988031278741",
+    "artist": "Ella Fitzgerald And Louis Armstrong",
+    "title": "Ella And Louis",
+    "format": "CD",
+    "year": "2018",
+    "genre": "Jazz",
+    "notes": "",
+    "coverUrl": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/ac/4b/53/ac4b5314-43aa-666b-43b2-845117e9c402/06UMGIM08714.rgb.jpg/600x600bb.jpg",
+    "timestamp": 1794649393504
+  },
+  {
     "barcode": "602498620465",
     "artist": "Diana Krall",
     "title": "The Girl in the Other Room",
