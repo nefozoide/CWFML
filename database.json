@@ -1,5 +1,16 @@
 [
   {
+    "barcode": "827969457122",
+    "artist": "Chris Botti",
+    "title": "When I Fall In Love",
+    "format": "CD",
+    "year": "2004",
+    "genre": "Jazz",
+    "notes": "",
+    "coverUrl": "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/f5/2c/47/f52c4720-42e6-a4cb-e7c0-2be535875e68/827969348529.jpg/600x600bb.jpg",
+    "timestamp": 1794642952579
+  },
+  {
     "barcode": "050644441622",
     "artist": "Ray Charles",
     "title": "Genius Loves Company",
