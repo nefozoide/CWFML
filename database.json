@@ -1,5 +1,15 @@
 [
   {
+    "barcode": "828767896120",
+    "artist": "Ruben Studdard",
+    "title": "The Return",
+    "format": "CD",
+    "year": "2006",
+    "genre": "",
+    "notes": "",
+    "coverUrl": "https://coverartarchive.org/release/0a60eee3-ba97-4700-a246-322c4351c323/4319441473-500.jpg"
+  },
+  {
     "barcode": "012414160324",
     "artist": "Joe",
     "title": "All That I Am",
