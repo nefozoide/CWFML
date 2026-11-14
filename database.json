@@ -1,5 +1,16 @@
 [
   {
+    "barcode": "828765105491",
+    "artist": "Santana",
+    "title": "Supernatural",
+    "format": "DVD Audio",
+    "year": "2003",
+    "genre": "dvd-audio+dvd-video",
+    "notes": "",
+    "coverUrl": "http://coverartarchive.org/release/4905955e-6eaa-44b7-b094-aba82d0513cf/33110396147-500.jpg",
+    "timestamp": 1794641957522
+  },
+  {
     "barcode": "602498177068",
     "artist": "Elton John",
     "title": "Goodbye Yellow Brick Road",
