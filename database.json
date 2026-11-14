@@ -1,5 +1,16 @@
 [
   {
+    "barcode": "4988017610374",
+    "artist": "Monica",
+    "title": "All Eyez On Me",
+    "format": "CD",
+    "year": "2002",
+    "genre": "Funk / Soul",
+    "notes": "",
+    "coverUrl": "https://is1-ssl.mzstatic.com/image/thumb/Music123/v4/ae/43/97/ae4397a9-00b2-99a7-a814-7634accd9b4e/886447715765.jpg/600x600bb.jpg",
+    "timestamp": 1794647176862
+  },
+  {
     "barcode": "743212571721",
     "artist": "Annie Lennox",
     "title": "Medusa",
