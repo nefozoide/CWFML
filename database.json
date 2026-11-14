@@ -1,5 +1,16 @@
 [
   {
+    "barcode": "075678377624",
+    "artist": "Jason Mraz",
+    "title": "Mr. A-Z",
+    "format": "CD",
+    "year": "2005",
+    "genre": "Rock",
+    "notes": "",
+    "coverUrl": "https://is1-ssl.mzstatic.com/image/thumb/Music/ba/68/ee/mzi.kddunpxa.jpg/600x600bb.jpg",
+    "timestamp": 1794642506445
+  },
+  {
     "barcode": "075678261398",
     "artist": "Hootie & the Blowfish",
     "title": "Cracked Rear View",
