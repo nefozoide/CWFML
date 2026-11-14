@@ -188,6 +188,7 @@
       <div class="chip" onclick="setFilter('Vinyl (LP)', this)">Vinyl (LP)</div>
       <div class="chip" onclick="setFilter('SACD', this)">SACD</div>
       <div class="chip" onclick="setFilter('CD', this)">CD</div>
+      <div class="chip" onclick="setFilter('SHM-CD', this)">SHM-CD</div>
       <div class="chip" onclick="setFilter('DVD Audio', this)">DVD Audio</div>
       <div class="chip" onclick="setFilter('Blu-ray', this)">Blu-ray</div>
       <div class="chip" onclick="setFilter('Box Set', this)">Box Set</div>
@@ -237,6 +238,7 @@
         <label style="margin-top: 6px;" id="lblFormat">Format:</label>
         <select id="mFormat">
           <option value="CD">CD</option>
+          <option value="SHM-CD">SHM-CD</option>
           <option value="Vinyl (LP)">Vinyl (LP)</option>
           <option value="DVD Audio">DVD Audio</option>
           <option value="Blu-ray">Blu-ray</option>
@@ -284,6 +286,7 @@
         <label id="lblEditFormat">Format</label>
         <select id="editFormat" class="edit-select">
           <option value="CD">CD</option>
+          <option value="SHM-CD">SHM-CD</option>
           <option value="Vinyl (LP)">Vinyl (LP)</option>
           <option value="DVD Audio">DVD Audio</option>
           <option value="Blu-ray">Blu-ray</option>
@@ -1018,6 +1021,7 @@
           const rawFmt = release.media[0].format.toLowerCase();
           if (rawFmt.includes("blu-ray") || rawFmt.includes("bluray")) format = "Blu-ray";
           else if (rawFmt.includes("vinyl") || rawFmt.includes("lp")) format = "Vinyl (LP)";
+          else if (rawFmt.includes("shm")) format = "SHM-CD";
           else if (rawFmt.includes("dvd") && rawFmt.includes("audio")) format = "DVD Audio";
           else if (rawFmt.includes("sacd")) format = "SACD";
           else if (release.media.length > 2 || rawFmt.includes("box")) format = "Box Set";
@@ -1064,6 +1068,7 @@
         const fmtStr = (item.format || []).join(" ").toLowerCase();
         if (fmtStr.includes("blu-ray")) format = "Blu-ray";
         else if (fmtStr.includes("vinyl") || fmtStr.includes("lp")) format = "Vinyl (LP)";
+        else if (fmtStr.includes("shm-cd") || fmtStr.includes("shm")) format = "SHM-CD";
         else if (fmtStr.includes("dvd audio")) format = "DVD Audio";
         else if (fmtStr.includes("sacd")) format = "SACD";
         else if (fmtStr.includes("box set")) format = "Box Set";
