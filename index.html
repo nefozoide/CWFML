@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <meta name="theme-color" content="#0f1115" />
-  <title>Record Collection</title>
+  <title>CWF Media Library</title>
   <link rel="manifest" href="manifest.json" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -141,7 +141,7 @@
 <body>
 
   <header>
-    <div class="welcome-banner">Hey You! 👋</div>
+    <div class="welcome-banner">Hey Chris! 👋🏾</div>
 
     <div id="installBanner" class="install-banner">
       <span id="installText"></span>
@@ -152,7 +152,7 @@
     </div>
 
     <div class="top-bar">
-      <h1 id="appTitle">🎵 My Record Collection</h1>
+      <h1 id="appTitle">📀 My Library</h1>
       <div class="actions-group">
         <button class="lang-icon-btn" onclick="toggleLanguage()" title="Cambiar Idioma / Change Language">
           <img src="https://play-lh.googleusercontent.com/L-NOoF7qLgO3m-pP-A7IF1X2AiCSyL2iF_AOv9rNqFjQWBznDtFXjDrtujXEJa9NfPaNOXLR7inEQ_QuFfZd-QQ=s0-br30" alt="ES/EN" />
@@ -302,7 +302,7 @@
 
     const translations = {
       en: {
-        title: "🎵 My Record Collection",
+        title: "📀 My Library",
         searchPlaceholder: "Search artist, album, genre or barcode...",
         scanBtn: "📷 Scan or Search UPC",
         loading: "Loading collection from GitHub...",
@@ -329,10 +329,10 @@
         notesPlaceholder: "Add personal notes...",
         saveChanges: "💾 Save Changes",
         deleteBtn: "🗑️ Delete",
-        deleteConfirm: "Are you sure you want to delete this album from GitHub?"
+        deleteConfirm: "DO you want to delete this album from your library?"
       },
       es: {
-        title: "🎵 Mi Discoteca",
+        title: "📀 Mi Biblioteca",
         searchPlaceholder: "Buscar artista, álbum, género o código...",
         scanBtn: "📷 Escanear o Buscar UPC",
         loading: "Cargando colección desde GitHub...",
@@ -359,7 +359,7 @@
         notesPlaceholder: "Añade notas personales...",
         saveChanges: "💾 Guardar Cambios",
         deleteBtn: "🗑️ Eliminar",
-        deleteConfirm: "¿Estás seguro de que deseas eliminar este álbum de GitHub?"
+        deleteConfirm: "¿Quieres eliminar este álbum de tu biblioteca?"
       }
     };
 
@@ -393,8 +393,8 @@
         banner.classList.add("show");
       } else if (deferredInstallPrompt) {
         textEl.innerText = currentLang === "es"
-          ? "📲 Instala la app en tu pantalla de inicio"
-          : "📲 Install app on your home screen";
+          ? "📲 Instala esta app en tu pantalla de inicio"
+          : "📲 Install this app on your home screen";
         btnEl.innerText = currentLang === "es" ? "Instalar" : "Install";
         btnEl.style.display = "inline-block";
         banner.classList.add("show");
@@ -541,7 +541,7 @@
       });
 
       if (filteredIndices.length === 0) {
-        container.innerHTML = `<div class="loader">${currentLang === 'es' ? 'No se encontraron discos con ese filtro.' : 'No records found.'}</div>`;
+        container.innerHTML = `<div class="loader">${currentLang === 'es' ? 'No se encontró el álbum.' : 'No records found.'}</div>`;
         return;
       }
 
@@ -818,8 +818,8 @@
 
         resBox.className = "result-box added";
         resBox.innerHTML = currentLang === 'es'
-          ? `<strong>✅ ¡Agregado a GitHub!</strong><br>${meta.artist} – <i>${meta.title}</i> (${meta.format})`
-          : `<strong>✅ Added to GitHub!</strong><br>${meta.artist} – <i>${meta.title}</i> (${meta.format})`;
+          ? `<strong>✅ ¡Listo!</strong><br>${meta.artist} – <i>${meta.title}</i> (${meta.format})`
+          : `<strong>✅ Done!</strong><br>${meta.artist} – <i>${meta.title}</i> (${meta.format})`;
         await loadCollection();
 
       } catch (err) {
@@ -839,8 +839,8 @@
     function showDuplicateAlert(resBox, album) {
       resBox.className = "result-box duplicate";
       resBox.innerHTML = currentLang === 'es'
-        ? `<strong>⚠️ ¡Ya lo tienes en la colección!</strong><br>${album.artist} – <i>${album.title}</i> (${album.format})`
-        : `<strong>⚠️ Already in collection!</strong><br>${album.artist} – <i>${album.title}</i> (${album.format})`;
+        ? `<strong>⚠️ ¡Ya esta en la biblioteca!</strong><br>${album.artist} – <i>${album.title}</i> (${album.format})`
+        : `<strong>⚠️ Already in library!</strong><br>${album.artist} – <i>${album.title}</i> (${album.format})`;
     }
 
     async function lookupFallbackCover(artist, title) {
