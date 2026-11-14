@@ -87,6 +87,7 @@
     .manual-row { display: flex; gap: 8px; margin-top: 10px; }
     .manual-row input, .manual-row select { flex: 1; padding: 11px; border-radius: 10px; background: var(--bg); border: 1px solid var(--border); color: #fff; outline: none; }
     .btn-primary { background: var(--accent); color: #000; border: none; border-radius: 10px; padding: 12px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 10px; }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-secondary { background: var(--border); color: var(--text); border: none; border-radius: 10px; padding: 12px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 8px; }
     
     .result-box { margin-top: 14px; padding: 14px; border-radius: 12px; display: none; color: var(--text); }
@@ -149,7 +150,7 @@
       <div id="manualInputContainer" style="display:none; margin-top: 10px;">
         <div class="manual-row">
           <input type="tel" id="manualBarcode" placeholder="Enter barcode digits..." />
-          <button class="btn-primary" style="width: auto; margin-top:0;" onclick="processBarcode(document.getElementById('manualBarcode').value)">Search</button>
+          <button class="btn-primary" id="btnManualSearch" style="width: auto; margin-top:0;" onclick="processBarcode(document.getElementById('manualBarcode').value)">Search</button>
         </div>
       </div>
 
@@ -188,6 +189,7 @@
     let activeFormat = "ALL";
     let scannedBarcodeCache = "";
     let currentLang = localStorage.getItem("app_lang") || "en";
+    let isProcessing = false;
 
     const translations = {
       en: {
@@ -206,10 +208,7 @@
         coverUrl: "Cover URL (Optional):",
         save: "Save to GitHub",
         search: "Search",
-        typeManual: "⌨️ Type barcode manually",
-        takePhoto: "📸 Take photo of barcode",
-        enterBarcode: "Enter barcode digits...",
-        notAdded: "Could not process code."
+        enterBarcode: "Enter barcode digits..."
       },
       es: {
         title: "🎵 Mi Discoteca",
@@ -227,10 +226,7 @@
         coverUrl: "URL de Portada (Opcional):",
         save: "Guardar en GitHub",
         search: "Buscar",
-        typeManual: "⌨️ Escribir código manualmente",
-        takePhoto: "📸 Tomar foto del código de barras",
-        enterBarcode: "Escribe el código de barras...",
-        notAdded: "Error procesando el código."
+        enterBarcode: "Escribe el código de barras..."
       }
     };
 
@@ -254,7 +250,8 @@
       document.getElementById("appTitle").innerText = t.title;
       document.getElementById("searchInput").placeholder = t.searchPlaceholder;
       document.getElementById("fabBtn").innerHTML = t.scanBtn;
-      document.getElementById("loadingText").innerText = t.loading;
+      const loadingEl = document.getElementById("loadingText");
+      if (loadingEl) loadingEl.innerText = t.loading;
       document.getElementById("modalTitle").innerText = t.modalTitle;
       document.getElementById("warningText").innerText = t.warning;
       document.getElementById("lblArtist").innerText = t.artist;
@@ -263,12 +260,18 @@
       document.getElementById("lblYear").innerText = t.year;
       document.getElementById("lblCover").innerText = t.coverUrl;
       document.getElementById("btnSaveGithub").innerText = t.save;
+      document.getElementById("btnManualSearch").innerText = t.search;
       
       document.getElementById("configBtn").innerText = currentLang === "es" ? "⚙️ Config" : "⚙️ Setup";
       document.getElementById("manualBarcode").placeholder = t.enterBarcode;
       
       const countEl = document.getElementById("totalCount");
-      if(allAlbums.length >= 0) countEl.innerText = allAlbums.length + " " + t.total;
+      if (allAlbums.length >= 0) countEl.innerText = allAlbums.length + " " + t.total;
+    }
+
+    // Normaliza códigos de barras (quita espacios, guiones y ceros iniciales para evitar duplicados UPC-A vs EAN-13)
+    function normalizeBarcode(code) {
+      return String(code || "").replace(/[^0-9]/g, "").replace(/^0+/, "").trim();
     }
 
     function getToken() { return localStorage.getItem("gh_token") || ""; }
@@ -277,15 +280,36 @@
         ? "Ingresa tu Token de acceso personal de GitHub (con permisos de repo):" 
         : "Enter your GitHub Personal Access Token (with repo permissions):";
       const token = prompt(promptText, getToken());
-      if (token !== null) { localStorage.setItem("gh_token", token.trim()); alert(currentLang === "es" ? "¡Token guardado!" : "Token saved!"); loadCollection(); }
+      if (token !== null) {
+        localStorage.setItem("gh_token", token.trim());
+        alert(currentLang === "es" ? "¡Token guardado!" : "Token saved!");
+        loadCollection();
+      }
     }
 
+    // Carga en tiempo real desde la API de GitHub (0 segundos de retraso de caché)
     async function loadCollection() {
       try {
-        const url = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/${FILE_PATH}?t=${Date.now()}`;
-        const res = await fetch(url);
-        if (!res.ok) throw new Error();
-        allAlbums = await res.json() || [];
+        const token = getToken();
+        let data = [];
+
+        if (token) {
+          const apiUrl = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${FILE_PATH}?t=${Date.now()}`;
+          const res = await fetch(apiUrl, {
+            headers: { "Authorization": `token ${token}` },
+            cache: "no-store"
+          });
+          if (!res.ok) throw new Error();
+          const fileData = await res.json();
+          data = JSON.parse(decodeURIComponent(escape(atob(fileData.content)))) || [];
+        } else {
+          const rawUrl = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/${FILE_PATH}?t=${Date.now()}`;
+          const res = await fetch(rawUrl, { cache: "no-store" });
+          if (!res.ok) throw new Error();
+          data = await res.json() || [];
+        }
+
+        allAlbums = data;
         const t = translations[currentLang];
         document.getElementById("totalCount").innerText = allAlbums.length + " " + t.total;
         renderGrid();
@@ -309,7 +333,11 @@
 
       const filtered = allAlbums.filter(item => {
         const matchesFormat = activeFormat === "ALL" || item.format === activeFormat;
-        const matchesQuery = !q || item.artist.toLowerCase().includes(q) || item.title.toLowerCase().includes(q) || (item.genre && item.genre.toLowerCase().includes(q)) || item.barcode.includes(q);
+        const matchesQuery = !q ||
+          item.artist.toLowerCase().includes(q) ||
+          item.title.toLowerCase().includes(q) ||
+          (item.genre && item.genre.toLowerCase().includes(q)) ||
+          item.barcode.includes(q);
         return matchesFormat && matchesQuery;
       });
 
@@ -339,6 +367,7 @@
     function openScannerModal() {
       document.getElementById("scannerOptions").style.display = "block";
       document.getElementById("manualInputContainer").style.display = "none";
+      document.getElementById("manualBarcode").value = "";
       document.getElementById("scannerModal").classList.add("open");
       document.getElementById("scanResult").style.display = "none";
       document.getElementById("manualForm").classList.remove("active");
@@ -387,29 +416,34 @@
     }
 
     async function processBarcode(code) {
+      if (isProcessing) return;
       const barcode = String(code || "").replace(/[^0-9]/g, "").trim();
       if (!barcode) return;
+
+      isProcessing = true;
+      const searchBtn = document.getElementById("btnManualSearch");
+      if (searchBtn) searchBtn.disabled = true;
+
       scannedBarcodeCache = barcode;
+      const normCode = normalizeBarcode(barcode);
 
       const resBox = document.getElementById("scanResult");
       resBox.className = "result-box added";
       resBox.style.display = "block";
       document.getElementById("manualForm").classList.remove("active");
 
-      const duplicate = allAlbums.find(item => item.barcode === barcode);
-      if (duplicate) {
-        resBox.className = "result-box duplicate";
-        resBox.innerHTML = currentLang === 'es'
-          ? `<strong>⚠️ ¡Ya lo tienes!</strong><br>${duplicate.artist} – <i>${duplicate.title}</i> (${duplicate.format})`
-          : `<strong>⚠️ Already in collection!</strong><br>${duplicate.artist} – <i>${duplicate.title}</i> (${duplicate.format})`;
-        return;
-      }
-
-      resBox.innerHTML = currentLang === 'es' 
-        ? `🔍 Buscando código <b>${barcode}</b>...` 
-        : `🔍 Searching barcode <b>${barcode}</b>...`;
-
       try {
+        // 1. Revisión rápida en memoria local
+        const localDup = allAlbums.find(item => normalizeBarcode(item.barcode) === normCode);
+        if (localDup) {
+          showDuplicateAlert(resBox, localDup);
+          return;
+        }
+
+        resBox.innerHTML = currentLang === 'es' 
+          ? `🔍 Buscando código <b>${barcode}</b>...` 
+          : `🔍 Searching barcode <b>${barcode}</b>...`;
+
         let meta = await lookupMusicBrainz(barcode);
         if (!meta.found) {
           meta = await lookupDiscogs(barcode);
@@ -438,16 +472,34 @@
           coverUrl: meta.coverUrl
         };
 
+        // 2. Guardar en GitHub con verificación en vivo contra la nube
         await saveAlbumToGitHub(newAlbum);
+
         resBox.className = "result-box added";
         resBox.innerHTML = currentLang === 'es'
           ? `<strong>✅ ¡Agregado a GitHub!</strong><br>${meta.artist} – <i>${meta.title}</i> (${meta.format})`
           : `<strong>✅ Added to GitHub!</strong><br>${meta.artist} – <i>${meta.title}</i> (${meta.format})`;
-        loadCollection();
+        await loadCollection();
+
       } catch (err) {
-        resBox.className = "result-box error";
-        resBox.innerHTML = currentLang === 'es' ? "❌ Error procesando el código." : "❌ Error processing barcode.";
+        if (err && err.isDuplicate) {
+          showDuplicateAlert(resBox, err.existingAlbum);
+          await loadCollection(); // Sincroniza la lista local
+        } else {
+          resBox.className = "result-box error";
+          resBox.innerHTML = currentLang === 'es' ? "❌ Error procesando el código." : "❌ Error processing barcode.";
+        }
+      } finally {
+        isProcessing = false;
+        if (searchBtn) searchBtn.disabled = false;
       }
+    }
+
+    function showDuplicateAlert(resBox, album) {
+      resBox.className = "result-box duplicate";
+      resBox.innerHTML = currentLang === 'es'
+        ? `<strong>⚠️ ¡Ya lo tienes en la colección!</strong><br>${album.artist} – <i>${album.title}</i> (${album.format})`
+        : `<strong>⚠️ Already in collection!</strong><br>${album.artist} – <i>${album.title}</i> (${album.format})`;
     }
 
     async function lookupMusicBrainz(barcode) {
@@ -525,6 +577,7 @@
     }
 
     async function saveManualAlbum() {
+      if (isProcessing) return;
       const artist = document.getElementById("mArtist").value.trim();
       const title = document.getElementById("mTitle").value.trim();
       const format = document.getElementById("mFormat").value;
@@ -535,6 +588,10 @@
         alert(currentLang === 'es' ? "Completa al menos Artista y Título." : "Complete at least Artist and Title."); 
         return; 
       }
+
+      isProcessing = true;
+      const saveBtn = document.getElementById("btnSaveGithub");
+      saveBtn.disabled = true;
 
       const newAlbum = { barcode: scannedBarcodeCache, artist, title, format, year, genre: "", coverUrl };
       const resBox = document.getElementById("scanResult");
@@ -547,10 +604,19 @@
           ? `<strong>✅ ¡Guardado con éxito!</strong><br>${artist} – <i>${title}</i>`
           : `<strong>✅ Saved successfully!</strong><br>${artist} – <i>${title}</i>`;
         document.getElementById("manualForm").classList.remove("active");
-        loadCollection();
-      } catch {
-        resBox.className = "result-box error";
-        resBox.innerHTML = currentLang === 'es' ? "❌ Error al guardar. Token inválido." : "❌ Save error. Invalid Token.";
+        await loadCollection();
+      } catch (err) {
+        if (err && err.isDuplicate) {
+          showDuplicateAlert(resBox, err.existingAlbum);
+          document.getElementById("manualForm").classList.remove("active");
+          await loadCollection();
+        } else {
+          resBox.className = "result-box error";
+          resBox.innerHTML = currentLang === 'es' ? "❌ Error al guardar. Token inválido." : "❌ Save error. Invalid Token.";
+        }
+      } finally {
+        isProcessing = false;
+        saveBtn.disabled = false;
       }
     }
 
@@ -559,13 +625,32 @@
       if (!token) { setupToken(); throw new Error("Token requerido"); }
 
       const apiUrl = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${FILE_PATH}`;
-      const getRes = await fetch(apiUrl, { headers: { "Authorization": `token ${token}` } });
+      
+      // 1. Obtener el archivo REAL y más reciente directamente de la API de GitHub
+      const getRes = await fetch(`${apiUrl}?t=${Date.now()}`, {
+        headers: { "Authorization": `token ${token}` },
+        cache: "no-store"
+      });
       if (!getRes.ok) throw new Error();
       const fileData = await getRes.json();
       
       const currentContent = JSON.parse(decodeURIComponent(escape(atob(fileData.content))));
-      currentContent.unshift(newAlbum);
 
+      // 2. Verificación estricta de duplicados en la nube antes de escribir
+      const normNew = normalizeBarcode(newAlbum.barcode);
+      const duplicateInCloud = currentContent.find(item =>
+        (normNew && normalizeBarcode(item.barcode) === normNew) ||
+        (item.artist.toLowerCase().trim() === newAlbum.artist.toLowerCase().trim() &&
+         item.title.toLowerCase().trim() === newAlbum.title.toLowerCase().trim() &&
+         item.format === newAlbum.format)
+      );
+
+      if (duplicateInCloud) {
+        throw { isDuplicate: true, existingAlbum: duplicateInCloud };
+      }
+
+      // 3. Insertar al inicio y subir
+      currentContent.unshift(newAlbum);
       const updatedContentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(currentContent, null, 2))));
 
       const putRes = await fetch(apiUrl, {
