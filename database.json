@@ -1,5 +1,16 @@
 [
   {
+    "barcode": "093624939627",
+    "artist": "Eric Clapton",
+    "title": "Back Home",
+    "format": "CD",
+    "year": "2005",
+    "genre": "",
+    "notes": "",
+    "coverUrl": "http://coverartarchive.org/release/6d2cce41-cc04-4aaf-9ba9-54e2c247363c/8864025708.jpg",
+    "timestamp": 1794642594931
+  },
+  {
     "barcode": "827969088722",
     "artist": "Miles Davis",
     "title": "Kind of Blue",
