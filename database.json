@@ -1,5 +1,16 @@
 [
   {
+    "barcode": "828766188523",
+    "artist": "Mario",
+    "title": "Turning Point",
+    "format": "CD",
+    "year": "2004",
+    "genre": "",
+    "notes": "",
+    "coverUrl": "http://coverartarchive.org/release/7a679f56-be3c-4969-aecb-87b3c9627f47/25180307090-500.jpg",
+    "timestamp": 1794645857328
+  },
+  {
     "barcode": "602498811474",
     "artist": "One Twelve",
     "title": "Pleasure & Pain",
