@@ -1,5 +1,16 @@
 [
   {
+    "barcode": "074646940020",
+    "artist": "Michael Jackson",
+    "title": "Invincible",
+    "format": "CD",
+    "year": "2009",
+    "genre": "soul",
+    "notes": "",
+    "coverUrl": "https://coverartarchive.org/release/93f7a722-c41c-49d8-825c-3696e0092fb5/28042177156-500.jpg",
+    "timestamp": 1794647386651
+  },
+  {
     "barcode": "053361314026",
     "artist": "Esperanza Spalding",
     "title": "Esperanza",
