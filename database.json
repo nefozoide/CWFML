@@ -1,5 +1,16 @@
 [
   {
+    "barcode": "602498685822",
+    "artist": "Andrea Bocelli",
+    "title": "Andrea",
+    "format": "SACD",
+    "year": "2004",
+    "genre": "Pop",
+    "notes": "",
+    "coverUrl": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/3a/cb/99/3acb993f-a7be-24bf-ccc9-373f08f8fce4/24UMGIM67316.rgb.jpg/600x600bb.jpg",
+    "timestamp": 1794648332288
+  },
+  {
     "barcode": "028947062028",
     "artist": "Andrea Bocelli",
     "title": "Sentimento",
