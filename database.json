@@ -1,5 +1,16 @@
 [
   {
+    "barcode": "094637981023",
+    "artist": "The Beatles",
+    "title": "Love",
+    "format": "CD",
+    "year": "2006",
+    "genre": "Rock",
+    "notes": "",
+    "coverUrl": "https://is1-ssl.mzstatic.com/image/thumb/Music118/v4/bb/6c/72/bb6c7262-487c-24d6-338f-98f892d75f3c/00602567698579.rgb.jpg/600x600bb.jpg",
+    "timestamp": 1794643415420
+  },
+  {
     "barcode": "0828767197326",
     "artist": "Nina Simone",
     "title": "The Soul of Nina Simone",
