@@ -1,5 +1,16 @@
 [
   {
+    "barcode": "602498842577",
+    "artist": "Bon Jovi",
+    "title": "Slippery When Wet",
+    "format": "CD",
+    "year": "2005",
+    "genre": "",
+    "notes": "",
+    "coverUrl": "http://coverartarchive.org/release/3f14271c-c733-4196-a57d-05f7478ae14e/8707325050.jpg",
+    "timestamp": 1794642553083
+  },
+  {
     "barcode": "075678377624",
     "artist": "Jason Mraz",
     "title": "Mr. A-Z",
