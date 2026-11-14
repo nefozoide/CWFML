@@ -1,5 +1,16 @@
 [
   {
+    "barcode": "633367900425",
+    "artist": "Yes",
+    "title": "The Yes Album",
+    "format": "CD",
+    "year": "2014",
+    "genre": "",
+    "notes": "",
+    "coverUrl": "http://coverartarchive.org/release/dfcc20bb-503b-4cd1-a9c6-2137aec3102b/10921027420-500.jpg",
+    "timestamp": 1794638611902
+  },
+  {
     "barcode": "724349945890",
     "artist": "Dave Koz",
     "title": "The Dance",
