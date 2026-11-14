@@ -188,6 +188,7 @@
       <div class="chip" onclick="setFilter('Vinyl (LP)', this)">Vinyl (LP)</div>
       <div class="chip" onclick="setFilter('SACD', this)">SACD</div>
       <div class="chip" onclick="setFilter('CD', this)">CD</div>
+      <div class="chip" onclick="setFilter('DVD Audio', this)">DVD Audio</div>
       <div class="chip" onclick="setFilter('Blu-ray', this)">Blu-ray</div>
       <div class="chip" onclick="setFilter('Box Set', this)">Box Set</div>
     </div>
@@ -202,7 +203,6 @@
   </button>
 
   <input type="file" id="barcodeInputFile" accept="image/*" capture="environment" style="display:none;" onchange="handleBarcodeInput(event)">
-  <!-- Input oculto para subir foto de portada personalizada -->
   <input type="file" id="customCoverFile" accept="image/*" style="display:none;" onchange="handleCustomCoverInput(event)">
 
   <!-- Modal de Registro -->
@@ -238,6 +238,7 @@
         <select id="mFormat">
           <option value="CD">CD</option>
           <option value="Vinyl (LP)">Vinyl (LP)</option>
+          <option value="DVD Audio">DVD Audio</option>
           <option value="Blu-ray">Blu-ray</option>
           <option value="SACD">SACD</option>
           <option value="Box Set">Box Set</option>
@@ -245,7 +246,6 @@
         <label style="margin-top: 6px;" id="lblYear">Year:</label>
         <input type="tel" id="mYear" placeholder="e.g. 1976" />
         
-        <!-- Opción de buscar/subir foto de portada física -->
         <label style="margin-top: 6px;" id="lblCustomCover">Physical Cover Photo (Fix cover match):</label>
         <div style="display: flex; gap: 6px; margin-top: 4px; align-items: center;">
           <button type="button" class="btn-secondary" style="margin-top:0; font-size:0.78rem;" onclick="document.getElementById('customCoverFile').click()" id="btnUploadCover">📷 Upload / Take Photo</button>
@@ -285,6 +285,7 @@
         <select id="editFormat" class="edit-select">
           <option value="CD">CD</option>
           <option value="Vinyl (LP)">Vinyl (LP)</option>
+          <option value="DVD Audio">DVD Audio</option>
           <option value="Blu-ray">Blu-ray</option>
           <option value="SACD">SACD</option>
           <option value="Box Set">Box Set</option>
@@ -331,76 +332,6 @@
     const GITHUB_REPO = "CWFML";
     const FILE_PATH = "database.json";
 
-let backPressCount = 0;
-    let backPressTimer = null;
-
-    function setupDoubleBackToExit() {
-      // Empujamos un estado inicial para capturar el primer "Atrás"
-      history.pushState({ page: "home" }, "", "");
-
-      window.addEventListener("popstate", (event) => {
-        const scannerModal = document.getElementById("scannerModal");
-        const detailModal = document.getElementById("detailModal");
-        const searchInput = document.getElementById("searchInput");
-
-        // 1. Si hay un modal abierto, ciérralo primero
-        if (scannerModal.classList.contains("open")) {
-          closeScanner();
-          history.pushState({ page: "home" }, "", "");
-          return;
-        }
-        if (detailModal.classList.contains("open")) {
-          closeDetailModal();
-          history.pushState({ page: "home" }, "", "");
-          return;
-        }
-
-        // 2. Si hay texto en el buscador, limpia la búsqueda primero
-        if (searchInput.value.trim() !== "") {
-          searchInput.value = "";
-          renderGrid();
-          history.pushState({ page: "home" }, "", "");
-          return;
-        }
-
-        // 3. Control de doble toque para salir de la app en la pantalla principal
-        backPressCount++;
-        if (backPressCount === 1) {
-          // Opcional: Muestra un aviso sutil (toast) en lugar de alert
-          const exitMsg = currentLang === "es" ? "Presiona 'Atrás' de nuevo para salir" : "Press 'Back' again to exit";
-          showToast(exitMsg);
-
-          // Volvemos a empujar el estado para mantener atrapado el botón
-          history.pushState({ page: "home" }, "", "");
-
-          // Restablece el contador después de 2 segundos
-          backPressTimer = setTimeout(() => {
-            backPressCount = 0;
-          }, 2000);
-        } else if (backPressCount >= 2) {
-          clearTimeout(backPressTimer);
-          // Permite que el navegador ejecute la salida real
-          history.back();
-        }
-      });
-    }
-
-    // Función auxiliar para mostrar un aviso flotante (Toast) elegante
-    function showToast(message) {
-      let toast = document.getElementById("appToast");
-      if (!toast) {
-        toast = document.createElement("div");
-        toast.id = "appToast";
-        toast.style.cssText = "position:fixed; bottom:90px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.85); color:#fff; padding:8px 16px; border-radius:20px; font-size:0.8rem; z-index:9999; transition:opacity 0.3s; pointer-events:none;";
-        document.body.appendChild(toast);
-      }
-      toast.innerText = message;
-      toast.style.opacity = "1";
-      setTimeout(() => {
-        toast.style.opacity = "0";
-      }, 1800);
-    }
-    
     let allAlbums = [];
     let activeFormat = "ALL";
     let scannedBarcodeCache = "";
@@ -408,7 +339,7 @@ let backPressCount = 0;
     let isProcessing = false;
     let deferredInstallPrompt = null;
     let selectedAlbumIndex = null;
-    let tempCustomCoverBase64 = ""; // Variable temporal para la portada personalizada en base64
+    let tempCustomCoverBase64 = "";
 
     const translations = {
       en: {
@@ -491,11 +422,10 @@ let backPressCount = 0;
       window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
     }
 
-   window.onload = () => {
+    window.onload = () => {
       applyLanguage();
       loadCollection();
       initInstallPrompt();
-      setupDoubleBackToExit(); // Añadido aquí
     };
 
     function isAppInstalled() {
@@ -856,7 +786,7 @@ let backPressCount = 0;
     }
 
     function openScannerModal() {
-      tempCustomCoverBase64 = ""; // Resetear foto personalizada al abrir
+      tempCustomCoverBase64 = "";
       document.getElementById("scannerOptions").style.display = "block";
       document.getElementById("manualInputContainer").style.display = "none";
       document.getElementById("manualBarcode").value = "";
@@ -877,14 +807,12 @@ let backPressCount = 0;
       document.getElementById("manualBarcode").focus();
     }
 
-    // Manejar la subida o foto de la carátula personalizada
     function handleCustomCoverInput(event) {
       const file = event.target.files[0];
       if (!file) return;
 
       const reader = new FileReader();
       reader.onload = function(e) {
-        // Redimensionar imagen en un canvas para optimizar tamaño antes de convertir a Base64
         const img = new Image();
         img.onload = function() {
           const canvas = document.createElement("canvas");
@@ -912,11 +840,9 @@ let backPressCount = 0;
 
           tempCustomCoverBase64 = canvas.toDataURL("image/jpeg", 0.85);
 
-          // Si estamos en el modal de registro manual
           document.getElementById("mCover").value = tempCustomCoverBase64;
           document.getElementById("coverStatusText").innerText = translations[currentLang].coverStatusSet;
 
-          // Si estamos en el modal de detalles abierto
           if (selectedAlbumIndex !== null) {
             document.getElementById("editCoverUrl").value = tempCustomCoverBase64;
           }
@@ -1092,6 +1018,7 @@ let backPressCount = 0;
           const rawFmt = release.media[0].format.toLowerCase();
           if (rawFmt.includes("blu-ray") || rawFmt.includes("bluray")) format = "Blu-ray";
           else if (rawFmt.includes("vinyl") || rawFmt.includes("lp")) format = "Vinyl (LP)";
+          else if (rawFmt.includes("dvd") && rawFmt.includes("audio")) format = "DVD Audio";
           else if (rawFmt.includes("sacd")) format = "SACD";
           else if (release.media.length > 2 || rawFmt.includes("box")) format = "Box Set";
         }
@@ -1137,6 +1064,7 @@ let backPressCount = 0;
         const fmtStr = (item.format || []).join(" ").toLowerCase();
         if (fmtStr.includes("blu-ray")) format = "Blu-ray";
         else if (fmtStr.includes("vinyl") || fmtStr.includes("lp")) format = "Vinyl (LP)";
+        else if (fmtStr.includes("dvd audio")) format = "DVD Audio";
         else if (fmtStr.includes("sacd")) format = "SACD";
         else if (fmtStr.includes("box set")) format = "Box Set";
 
