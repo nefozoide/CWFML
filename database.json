@@ -1,5 +1,16 @@
 [
   {
+    "barcode": "4988031673195",
+    "artist": "Herbie Hancock",
+    "title": "Maiden Voyage",
+    "format": "SACD",
+    "year": "2024",
+    "genre": "Jazz",
+    "notes": "",
+    "coverUrl": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/64/b6/04/64b6040c-a931-0a5c-6b7c-82e0dd5c3d4c/19UMGIM73745.rgb.jpg/600x600bb.jpg",
+    "timestamp": 1794643719627
+  },
+  {
     "barcode": "093624848929",
     "artist": "The Flaming Lips",
     "title": "Yoshimi Battles the Pink Robots: 5.1",
