@@ -1,5 +1,16 @@
 [
   {
+    "barcode": "828765374897",
+    "artist": "Britney Spears",
+    "title": "In the Zone",
+    "format": "DVD Audio",
+    "year": "2004",
+    "genre": "",
+    "notes": "",
+    "coverUrl": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/38/8b/7a/388b7a8f-10ff-a4e0-7624-65e29ac6a793/828765374828.jpg/600x600bb.jpg",
+    "timestamp": 1794642000905
+  },
+  {
     "barcode": "828765105392",
     "artist": "Santana",
     "title": "Shaman",
