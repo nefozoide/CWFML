@@ -1,5 +1,16 @@
 [
   {
+    "barcode": "4988031778333",
+    "artist": "Paul McCartney",
+    "title": "Amoeba Gig",
+    "format": "CD",
+    "year": "2025",
+    "genre": "Rock",
+    "notes": "",
+    "coverUrl": "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/d5/be/1f/d5be1f2d-09ac-08d5-255f-414f4739e840/19UMGIM43536.rgb.jpg/600x600bb.jpg",
+    "timestamp": 1794650388932
+  },
+  {
     "barcode": "4988031778302",
     "artist": "Paul McCartney",
     "title": "Flaming Pie",
