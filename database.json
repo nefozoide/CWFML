@@ -1,5 +1,16 @@
 [
   {
+    "barcode": "724349945890",
+    "artist": "Dave Koz",
+    "title": "The Dance",
+    "format": "CD",
+    "year": "2001",
+    "genre": "Jazz",
+    "notes": "",
+    "coverUrl": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/c2/85/5e/c2855e0b-6234-982a-2bcd-7873d98f6e62/00724349945852.rgb.jpg/600x600bb.jpg",
+    "timestamp": 1794638383587
+  },
+  {
     "barcode": "676628700495",
     "artist": "Various",
     "title": "Awaken",
