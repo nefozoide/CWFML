@@ -1,5 +1,16 @@
 [
   {
+    "barcode": "827969395820",
+    "artist": "Jennifer Lopez",
+    "title": "Rebirth",
+    "format": "CD",
+    "year": "2005",
+    "genre": "",
+    "notes": "",
+    "coverUrl": "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/a7/4e/aa/a74eaadc-c346-37c9-b0be-0a35e1b7f309/886447504437.jpg/600x600bb.jpg",
+    "timestamp": 1794642612896
+  },
+  {
     "barcode": "093624939627",
     "artist": "Eric Clapton",
     "title": "Back Home",
