@@ -1,5 +1,16 @@
 [
   {
+    "barcode": "089408349102",
+    "artist": "John Pizzarelli",
+    "title": "Kisses In The Rain",
+    "format": "SACD",
+    "year": "2000",
+    "genre": "Jazz",
+    "notes": "",
+    "coverUrl": "https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/a3/d7/97/a3d797f0-482b-2383-5248-4a379db4e6a5/22CRGIM34001.rgb.jpg/600x600bb.jpg",
+    "timestamp": 1794649264989
+  },
+  {
     "barcode": "696998575363",
     "artist": "Chris Botti",
     "title": "Night Sessions",
