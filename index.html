@@ -269,7 +269,6 @@
       if (allAlbums.length >= 0) countEl.innerText = allAlbums.length + " " + t.total;
     }
 
-    // Normaliza códigos de barras (quita espacios, guiones y ceros iniciales para evitar duplicados UPC-A vs EAN-13)
     function normalizeBarcode(code) {
       return String(code || "").replace(/[^0-9]/g, "").replace(/^0+/, "").trim();
     }
@@ -287,7 +286,6 @@
       }
     }
 
-    // Carga en tiempo real desde la API de GitHub (0 segundos de retraso de caché)
     async function loadCollection() {
       try {
         const token = getToken();
@@ -433,7 +431,6 @@
       document.getElementById("manualForm").classList.remove("active");
 
       try {
-        // 1. Revisión rápida en memoria local
         const localDup = allAlbums.find(item => normalizeBarcode(item.barcode) === normCode);
         if (localDup) {
           showDuplicateAlert(resBox, localDup);
@@ -462,6 +459,11 @@
           return;
         }
 
+        // Si el álbum se encontró pero no tiene portada (como pasa con Discogs), buscar carátula en iTunes
+        if (!meta.coverUrl) {
+          meta.coverUrl = await lookupFallbackCover(meta.artist, meta.title);
+        }
+
         const newAlbum = {
           barcode: barcode,
           artist: meta.artist,
@@ -472,7 +474,6 @@
           coverUrl: meta.coverUrl
         };
 
-        // 2. Guardar en GitHub con verificación en vivo contra la nube
         await saveAlbumToGitHub(newAlbum);
 
         resBox.className = "result-box added";
@@ -484,7 +485,7 @@
       } catch (err) {
         if (err && err.isDuplicate) {
           showDuplicateAlert(resBox, err.existingAlbum);
-          await loadCollection(); // Sincroniza la lista local
+          await loadCollection();
         } else {
           resBox.className = "result-box error";
           resBox.innerHTML = currentLang === 'es' ? "❌ Error procesando el código." : "❌ Error processing barcode.";
@@ -500,6 +501,23 @@
       resBox.innerHTML = currentLang === 'es'
         ? `<strong>⚠️ ¡Ya lo tienes en la colección!</strong><br>${album.artist} – <i>${album.title}</i> (${album.format})`
         : `<strong>⚠️ Already in collection!</strong><br>${album.artist} – <i>${album.title}</i> (${album.format})`;
+    }
+
+    // Tercera fuente de respaldo solo para portadas en alta resolución (iTunes API gratuita)
+    async function lookupFallbackCover(artist, title) {
+      try {
+        const query = encodeURIComponent(`${artist} ${title}`);
+        const res = await fetch(`https://itunes.apple.com/search?term=${query}&entity=album&limit=1`);
+        if (!res.ok) return "";
+        const data = await res.json();
+        if (data.results && data.results.length > 0 && data.results[0].artworkUrl100) {
+          // Convierte la miniatura 100x100 a alta calidad 600x600
+          return data.results[0].artworkUrl100.replace("100x100bb", "600x600bb");
+        }
+        return "";
+      } catch {
+        return "";
+      }
     }
 
     async function lookupMusicBrainz(barcode) {
@@ -559,7 +577,8 @@
         const artist = titleParts.length > 1 ? titleParts[0] : "Unknown Artist";
         const title = titleParts.length > 1 ? titleParts.slice(1).join(" - ") : item.title;
         const year = item.year ? String(item.year) : "";
-        const coverUrl = item.cover_image || "";
+        let coverUrl = item.cover_image || "";
+        if (coverUrl.includes("spacer.gif")) coverUrl = "";
 
         let format = "CD";
         const fmtStr = (item.format || []).join(" ").toLowerCase();
@@ -582,7 +601,7 @@
       const title = document.getElementById("mTitle").value.trim();
       const format = document.getElementById("mFormat").value;
       const year = document.getElementById("mYear").value.trim();
-      const coverUrl = document.getElementById("mCover").value.trim();
+      let coverUrl = document.getElementById("mCover").value.trim();
 
       if (!artist || !title) { 
         alert(currentLang === 'es' ? "Completa al menos Artista y Título." : "Complete at least Artist and Title."); 
@@ -593,9 +612,15 @@
       const saveBtn = document.getElementById("btnSaveGithub");
       saveBtn.disabled = true;
 
-      const newAlbum = { barcode: scannedBarcodeCache, artist, title, format, year, genre: "", coverUrl };
       const resBox = document.getElementById("scanResult");
-      resBox.innerHTML = currentLang === 'es' ? "💾 Guardando en GitHub..." : "💾 Saving to GitHub...";
+      resBox.innerHTML = currentLang === 'es' ? "💾 Buscando portada y guardando..." : "💾 Finding cover & saving...";
+
+      // Si el usuario dejó vacía la URL de portada en el formulario manual, intentar buscarla automáticamente
+      if (!coverUrl) {
+        coverUrl = await lookupFallbackCover(artist, title);
+      }
+
+      const newAlbum = { barcode: scannedBarcodeCache, artist, title, format, year, genre: "", coverUrl };
 
       try {
         await saveAlbumToGitHub(newAlbum);
@@ -626,7 +651,6 @@
 
       const apiUrl = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${FILE_PATH}`;
       
-      // 1. Obtener el archivo REAL y más reciente directamente de la API de GitHub
       const getRes = await fetch(`${apiUrl}?t=${Date.now()}`, {
         headers: { "Authorization": `token ${token}` },
         cache: "no-store"
@@ -636,7 +660,6 @@
       
       const currentContent = JSON.parse(decodeURIComponent(escape(atob(fileData.content))));
 
-      // 2. Verificación estricta de duplicados en la nube antes de escribir
       const normNew = normalizeBarcode(newAlbum.barcode);
       const duplicateInCloud = currentContent.find(item =>
         (normNew && normalizeBarcode(item.barcode) === normNew) ||
@@ -649,7 +672,6 @@
         throw { isDuplicate: true, existingAlbum: duplicateInCloud };
       }
 
-      // 3. Insertar al inicio y subir
       currentContent.unshift(newAlbum);
       const updatedContentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(currentContent, null, 2))));
 
