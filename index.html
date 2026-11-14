@@ -31,15 +31,16 @@
     .actions-group { display: flex; gap: 6px; align-items: center; }
     
     .lang-icon-btn {
-      background: var(--card); border: 1px solid var(--border); border-radius: 10px;
-      padding: 3px 6px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+      padding: 3px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px; overflow: hidden;
       transition: transform 0.1s;
     }
     .lang-icon-btn:active { transform: scale(0.92); }
-    .lang-icon-btn svg { width: 24px; height: 24px; border-radius: 50%; }
+    .lang-icon-btn img { width: 100%; height: 100%; object-fit: cover; border-radius: 5px; }
 
-    .btn-small { background: var(--card); border: 1px solid var(--border); color: var(--muted); padding: 5px 9px; border-radius: 8px; font-size: 0.75rem; cursor: pointer; }
-    .badge-count { background: var(--card); border: 1px solid var(--border); padding: 4px 10px; border-radius: 999px; font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
+    .btn-small { background: var(--card); border: 1px solid var(--border); color: var(--muted); padding: 5px 9px; border-radius: 8px; font-size: 0.75rem; cursor: pointer; height: 28px; display: flex; align-items: center; }
+    .badge-count { background: var(--card); border: 1px solid var(--border); padding: 4px 10px; border-radius: 999px; font-size: 0.8rem; color: var(--muted); white-space: nowrap; height: 28px; display: flex; align-items: center; }
 
     .search-box {
       width: 100%; padding: 12px 14px; border-radius: 12px;
@@ -105,24 +106,8 @@
     <div class="top-bar">
       <h1 id="appTitle">🎵 My Record Collection</h1>
       <div class="actions-group">
-        <!-- Icono estático interactivo con representación MX / USA -->
         <button class="lang-icon-btn" onclick="toggleLanguage()" title="Cambiar Idioma / Change Language">
-          <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <clipPath id="circle-clip">
-                <circle cx="18" cy="18" r="17"/>
-              </clipPath>
-            </defs>
-            <g clip-path="url(#circle-clip)">
-              <path d="M18 1 V35 C9 35 1 27 1 18 C1 9 9 1 18 1 Z" fill="#ce1126"/>
-              <path d="M1 1 H14 V35 H1 Z" fill="#006847"/>
-              <path d="M10 1 H18 V35 H10 Z" fill="#ffffff"/>
-              <path d="M18 1 V35 C27 35 35 27 35 18 C35 9 27 1 18 1 Z" fill="#bf0a30"/>
-              <path d="M18 1 H35 V14 H18 Z" fill="#002868"/>
-              <path d="M18 6 H35 M18 11 H35" stroke="#ffffff" stroke-width="1.5"/>
-            </g>
-            <circle cx="18" cy="18" r="17" fill="none" stroke="#f59e0b" stroke-width="2"/>
-          </svg>
+          <img src="https://play-lh.googleusercontent.com/L-NOoF7qLgO3m-pP-A7IF1X2AiCSyL2iF_AOv9rNqFjQWBznDtFXjDrtujXEJa9NfPaNOXLR7inEQ_QuFfZd-QQ=s0-br30" alt="ES/EN" />
         </button>
         <button class="btn-small" id="configBtn" onclick="setupToken()">⚙️ Setup</button>
         <span class="badge-count" id="totalCount">Loading...</span>
