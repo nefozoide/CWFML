@@ -1,5 +1,16 @@
 [
   {
+    "barcode": "886971151329",
+    "artist": "Alicia Keys",
+    "title": "As I Am",
+    "format": "CD",
+    "year": "2007",
+    "genre": "",
+    "notes": "",
+    "coverUrl": "http://coverartarchive.org/release/43bfc9bd-1d95-48cf-aef5-b03040de9424/29539407043-500.jpg",
+    "timestamp": 1794645874069
+  },
+  {
     "barcode": "828766188523",
     "artist": "Mario",
     "title": "Turning Point",
