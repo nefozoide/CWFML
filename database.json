@@ -1,5 +1,16 @@
 [
   {
+    "barcode": "724385412394",
+    "artist": "Cassandra Wilson",
+    "title": "Traveling Miles",
+    "format": "CD",
+    "year": "2004",
+    "genre": "Jazz",
+    "notes": "",
+    "coverUrl": "https://is1-ssl.mzstatic.com/image/thumb/Music128/v4/83/c1/45/83c14599-ed32-30b0-1c80-a600b84f9734/00602537640942.rgb.jpg/600x600bb.jpg",
+    "timestamp": 1794641418313
+  },
+  {
     "barcode": "075596265393",
     "artist": "Björk",
     "title": "Vespertine",
