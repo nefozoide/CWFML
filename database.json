@@ -1,5 +1,16 @@
 [
   {
+    "barcode": "4895241435331",
+    "artist": "Bob James, David Sanborn",
+    "title": "Double Vision",
+    "format": "SACD",
+    "year": "2024",
+    "genre": "Jazz",
+    "notes": "",
+    "coverUrl": "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/22/21/63/2221634e-d6bf-2cd5-1341-c5a52081cdcf/4897012132913_3000.jpg/600x600bb.jpg",
+    "timestamp": 1794648434732
+  },
+  {
     "barcode": "4895241425097",
     "artist": "Bob James",
     "title": "Jazz Hands",
