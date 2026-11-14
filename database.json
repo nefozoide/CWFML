@@ -1,5 +1,16 @@
 [
   {
+    "barcode": "828766995220",
+    "artist": "Maroon 5",
+    "title": "Live - Friday The 13th",
+    "format": "CD",
+    "year": "2007",
+    "genre": "Rock, Pop",
+    "notes": "",
+    "coverUrl": "https://is1-ssl.mzstatic.com/image/thumb/Music128/v4/11/04/db/1104dbe5-e6b3-056c-4e17-56a399709f86/00602517430693.rgb.jpg/600x600bb.jpg",
+    "timestamp": 1794645884975
+  },
+  {
     "barcode": "886971151329",
     "artist": "Alicia Keys",
     "title": "As I Am",
