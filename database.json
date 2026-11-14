@@ -1,5 +1,16 @@
 [
   {
+    "barcode": "827969074664",
+    "artist": "John Mayer",
+    "title": "Heavier Things",
+    "format": "SACD",
+    "year": "2003",
+    "genre": "Rock",
+    "notes": "",
+    "coverUrl": "https://is1-ssl.mzstatic.com/image/thumb/Music/df/0a/be/mzi.bwiyzxrl.jpg/600x600bb.jpg",
+    "timestamp": 1794647923282
+  },
+  {
     "barcode": "074646988121",
     "artist": "Winans Phase 2",
     "title": "We Got Next",
