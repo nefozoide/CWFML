@@ -189,6 +189,10 @@
       <div class="chip" onclick="setFilter('SACD', this)">SACD</div>
       <div class="chip" onclick="setFilter('CD', this)">CD</div>
       <div class="chip" onclick="setFilter('SHM-CD', this)">SHM-CD</div>
+      <div class="chip" onclick="setFilter('MQA-CD', this)">MQA-CD</div>
+      <div class="chip" onclick="setFilter('UHQCD', this)">UHQCD</div>
+      <div class="chip" onclick="setFilter('Blu-spec CD', this)">Blu-spec CD</div>
+      <div class="chip" onclick="setFilter('XRCD', this)">XRCD</div>
       <div class="chip" onclick="setFilter('DVD Audio', this)">DVD Audio</div>
       <div class="chip" onclick="setFilter('Blu-ray', this)">Blu-ray</div>
       <div class="chip" onclick="setFilter('Box Set', this)">Box Set</div>
@@ -239,6 +243,10 @@
         <select id="mFormat">
           <option value="CD">CD</option>
           <option value="SHM-CD">SHM-CD</option>
+          <option value="MQA-CD">MQA-CD</option>
+          <option value="UHQCD">UHQCD</option>
+          <option value="Blu-spec CD">Blu-spec CD</option>
+          <option value="XRCD">XRCD</option>
           <option value="Vinyl (LP)">Vinyl (LP)</option>
           <option value="DVD Audio">DVD Audio</option>
           <option value="Blu-ray">Blu-ray</option>
@@ -287,6 +295,10 @@
         <select id="editFormat" class="edit-select">
           <option value="CD">CD</option>
           <option value="SHM-CD">SHM-CD</option>
+          <option value="MQA-CD">MQA-CD</option>
+          <option value="UHQCD">UHQCD</option>
+          <option value="Blu-spec CD">Blu-spec CD</option>
+          <option value="XRCD">XRCD</option>
           <option value="Vinyl (LP)">Vinyl (LP)</option>
           <option value="DVD Audio">DVD Audio</option>
           <option value="Blu-ray">Blu-ray</option>
@@ -1021,6 +1033,10 @@
           const rawFmt = release.media[0].format.toLowerCase();
           if (rawFmt.includes("blu-ray") || rawFmt.includes("bluray")) format = "Blu-ray";
           else if (rawFmt.includes("vinyl") || rawFmt.includes("lp")) format = "Vinyl (LP)";
+          else if (rawFmt.includes("mqa")) format = "MQA-CD";
+          else if (rawFmt.includes("uhq")) format = "UHQCD";
+          else if (rawFmt.includes("blu-spec")) format = "Blu-spec CD";
+          else if (rawFmt.includes("xrcd")) format = "XRCD";
           else if (rawFmt.includes("shm")) format = "SHM-CD";
           else if (rawFmt.includes("dvd") && rawFmt.includes("audio")) format = "DVD Audio";
           else if (rawFmt.includes("sacd")) format = "SACD";
@@ -1068,6 +1084,10 @@
         const fmtStr = (item.format || []).join(" ").toLowerCase();
         if (fmtStr.includes("blu-ray")) format = "Blu-ray";
         else if (fmtStr.includes("vinyl") || fmtStr.includes("lp")) format = "Vinyl (LP)";
+        else if (fmtStr.includes("mqa")) format = "MQA-CD";
+        else if (fmtStr.includes("uhq")) format = "UHQCD";
+        else if (fmtStr.includes("blu-spec")) format = "Blu-spec CD";
+        else if (fmtStr.includes("xrcd")) format = "XRCD";
         else if (fmtStr.includes("shm-cd") || fmtStr.includes("shm")) format = "SHM-CD";
         else if (fmtStr.includes("dvd audio")) format = "DVD Audio";
         else if (fmtStr.includes("sacd")) format = "SACD";
