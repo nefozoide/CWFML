@@ -106,13 +106,20 @@
     .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
     .close-btn { background: none; border: none; color: var(--muted); font-size: 1.5rem; cursor: pointer; }
 
-    /* Estilos para el detalle del álbum */
     .detail-cover { width: 100%; aspect-ratio: 1/1; border-radius: 12px; overflow: hidden; background: #232732; margin-bottom: 14px; display: flex; align-items: center; justify-content: center; }
     .detail-cover img { width: 100%; height: 100%; object-fit: cover; }
-    .detail-info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    .detail-info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; align-items: center; }
     .detail-label { color: var(--muted); font-weight: 600; }
     .detail-value { font-weight: 700; text-align: right; }
-    .btn-danger { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid var(--danger); border-radius: 10px; padding: 12px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 15px; }
+    
+    .notes-textarea {
+      width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text);
+      border-radius: 10px; padding: 10px; font-size: 0.9rem; margin-top: 6px; resize: vertical; min-height: 70px; outline: none;
+    }
+    .notes-textarea:focus { border-color: var(--accent); }
+
+    .btn-danger { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid var(--danger); border-radius: 10px; padding: 12px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 10px; }
+    .btn-actions-group { display: flex; gap: 8px; margin-top: 15px; }
 
     .manual-row { display: flex; gap: 8px; margin-top: 10px; }
     .manual-row input, .manual-row select { flex: 1; padding: 11px; border-radius: 10px; background: var(--bg); border: 1px solid var(--border); color: #fff; outline: none; }
@@ -220,7 +227,7 @@
     </div>
   </div>
 
-  <!-- Modal de Detalles del Álbum (Nuevo) -->
+  <!-- Modal de Detalles y Notas del Álbum -->
   <div class="modal-backdrop" id="detailModal">
     <div class="modal">
       <div class="modal-header">
@@ -254,7 +261,17 @@
         <span class="detail-label" id="lblDetailBarcode">Barcode</span>
         <span class="detail-value" id="detailBarcode">-</span>
       </div>
-      <button class="btn-danger" id="btnDeleteAlbum" onclick="deleteCurrentAlbum()">🗑️ Delete from Collection</button>
+
+      <!-- Cuadro de texto de Notas -->
+      <div style="margin-top: 12px;">
+        <label id="lblNotesTitle" style="font-weight: 600; color: var(--muted); margin-bottom: 4px;">Notes / Custom Genre:</label>
+        <textarea id="detailNotes" class="notes-textarea" placeholder="Add personal notes, correct genre, state of the disc..."></textarea>
+      </div>
+
+      <div class="btn-actions-group">
+        <button class="btn-primary" id="btnSaveNotes" onclick="saveAlbumNotes()" style="margin-top:0;">💾 Save Notes</button>
+        <button class="btn-danger" id="btnDeleteAlbum" onclick="deleteCurrentAlbum()" style="margin-top:0;">🗑️ Delete</button>
+      </div>
     </div>
   </div>
 
@@ -296,7 +313,10 @@
         lblYear: "Year",
         lblGenre: "Genre",
         lblBarcode: "Barcode",
-        deleteBtn: "🗑️ Delete from Collection",
+        lblNotes: "Notes / Custom Genre:",
+        notesPlaceholder: "Add personal notes, correct genre, state of the disc...",
+        saveNotes: "💾 Save Notes",
+        deleteBtn: "🗑️ Delete",
         deleteConfirm: "Are you sure you want to delete this album from GitHub?"
       },
       es: {
@@ -323,7 +343,10 @@
         lblYear: "Año",
         lblGenre: "Género",
         lblBarcode: "Código de barras",
-        deleteBtn: "🗑️ Eliminar de la colección",
+        lblNotes: "Notas / Género personalizado:",
+        notesPlaceholder: "Añade notas personales, corrige el género, estado del disco...",
+        saveNotes: "💾 Guardar Notas",
+        deleteBtn: "🗑️ Eliminar",
         deleteConfirm: "¿Estás seguro de que deseas eliminar este álbum de GitHub?"
       }
     };
@@ -411,6 +434,9 @@
       document.getElementById("btnSaveGithub").innerText = t.save;
       document.getElementById("btnManualSearch").innerText = t.search;
       document.getElementById("btnDeleteAlbum").innerText = t.deleteBtn;
+      document.getElementById("btnSaveNotes").innerText = t.saveNotes;
+      document.getElementById("lblNotesTitle").innerText = t.lblNotes;
+      document.getElementById("detailNotes").placeholder = t.notesPlaceholder;
       
       document.getElementById("lblDetailArtist").innerText = t.lblArtist;
       document.getElementById("lblDetailTitle").innerText = t.lblTitle;
@@ -495,6 +521,7 @@
           item.artist.toLowerCase().includes(q) ||
           item.title.toLowerCase().includes(q) ||
           (item.genre && item.genre.toLowerCase().includes(q)) ||
+          (item.notes && item.notes.toLowerCase().includes(q)) ||
           item.barcode.includes(q);
         if (matchesFormat && matchesQuery) {
           filteredIndices.push({ item, index });
@@ -517,14 +544,13 @@
             <div class="artist">${item.artist}</div>
             <div class="meta-row">
               <span class="year">${item.year || ""}</span>
-              <span class="genre">${item.genre || ""}</span>
+              <span class="genre">${item.notes || item.genre || ""}</span>
             </div>
           </div>
         </div>
       `).join("");
     }
 
-    // Funciones del Modal de Detalles
     function openAlbumDetail(index) {
       selectedAlbumIndex = index;
       const album = allAlbums[index];
@@ -543,6 +569,7 @@
       document.getElementById("detailYear").innerText = album.year || "-";
       document.getElementById("detailGenre").innerText = album.genre || (currentLang === 'es' ? "No especificado" : "Unspecified");
       document.getElementById("detailBarcode").innerText = album.barcode || "-";
+      document.getElementById("detailNotes").value = album.notes || "";
 
       document.getElementById("detailModal").classList.add("open");
     }
@@ -550,6 +577,54 @@
     function closeDetailModal() {
       document.getElementById("detailModal").classList.remove("open");
       selectedAlbumIndex = null;
+    }
+
+    async function saveAlbumNotes() {
+      if (selectedAlbumIndex === null) return;
+      const token = getToken();
+      if (!token) { setupToken(); return; }
+
+      const newNotes = document.getElementById("detailNotes").value.trim();
+      const apiUrl = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${FILE_PATH}`;
+      const saveBtn = document.getElementById("btnSaveNotes");
+      saveBtn.disabled = true;
+
+      try {
+        const getRes = await fetch(`${apiUrl}?t=${Date.now()}`, {
+          headers: { "Authorization": `token ${token}` },
+          cache: "no-store"
+        });
+        if (!getRes.ok) throw new Error();
+        const fileData = await getRes.json();
+        
+        let currentContent = JSON.parse(decodeURIComponent(escape(atob(fileData.content)))) || [];
+        
+        // Actualizar notas del álbum correspondiente
+        if (currentContent[selectedAlbumIndex]) {
+          currentContent[selectedAlbumIndex].notes = newNotes;
+        }
+
+        const updatedContentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(currentContent, null, 2))));
+
+        const putRes = await fetch(apiUrl, {
+          method: "PUT",
+          headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: `Update notes for: ${currentContent[selectedAlbumIndex].artist} - ${currentContent[selectedAlbumIndex].title}`,
+            content: updatedContentBase64,
+            sha: fileData.sha
+          })
+        });
+
+        if (!putRes.ok) throw new Error();
+
+        saveBtn.disabled = false;
+        closeDetailModal();
+        await loadCollection();
+      } catch (err) {
+        saveBtn.disabled = false;
+        alert(currentLang === 'es' ? "Error al guardar las notas." : "Error saving notes.");
+      }
     }
 
     async function deleteCurrentAlbum() {
@@ -572,8 +647,6 @@
         const fileData = await getRes.json();
         
         let currentContent = JSON.parse(decodeURIComponent(escape(atob(fileData.content)))) || [];
-        
-        // Filtrar quitando el álbum seleccionado
         currentContent = currentContent.filter(item => item.barcode !== albumToDelete.barcode || item.title !== albumToDelete.title);
 
         const updatedContentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(currentContent, null, 2))));
@@ -705,6 +778,7 @@
           format: meta.format,
           year: meta.year,
           genre: meta.genre,
+          notes: "",
           coverUrl: meta.coverUrl
         };
 
@@ -851,7 +925,7 @@
         coverUrl = await lookupFallbackCover(artist, title);
       }
 
-      const newAlbum = { barcode: scannedBarcodeCache, artist, title, format, year, genre: "", coverUrl };
+      const newAlbum = { barcode: scannedBarcodeCache, artist, title, format, year, genre: "", notes: "", coverUrl };
 
       try {
         await saveAlbumToGitHub(newAlbum);
@@ -889,17 +963,8 @@
       if (!getRes.ok) throw new Error();
       const fileData = await getRes.json();
       
-      const currentContent = JSON.parse(decodeURIComponent(escape(atob(fileData.content))));
+      const currentContent = JSON.parse(decodeURIComponent(escape(atob(fileData.content)))) || [];
 
-      const normNew = normalizeBarcode(newAlbum.barcode);
-      const duplicateInCloud = currentContent.find(item =>
-        (normNew && normalizeBarcode(item.barcode) === normNew) ||
-        (item.artist.logger?.toLowerCase?.() === newAlbum.artist.toLowerCase().trim() &&
-         item.title.toLowerCase().trim() === newAlbum.title.toLowerCase().trim() &&
-         item.format === newAlbum.format)
-      );
-
-      // Corrección segura de comparación de cadenas
       const strictDuplicate = currentContent.find(item => {
         const b1 = normalizeBarcode(item.barcode);
         const b2 = normalizeBarcode(newAlbum.barcode);
