@@ -172,11 +172,13 @@
     <div class="search-controls">
       <input type="text" id="searchInput" class="search-box" placeholder="Search artist, album, genre or barcode..." oninput="renderGrid()" />
       <select id="sortSelect" class="sort-select" onchange="renderGrid()">
+        <option value="date-desc" id="optDateDesc">📅 Newest added</option>
+        <option value="date-asc" id="optDateAsc">📅 Oldest added</option>
         <option value="artist-asc">👤 Artist (A-Z)</option>
         <option value="artist-desc">👤 Artist (Z-A)</option>
         <option value="title-asc">💿 Title (A-Z)</option>
-        <option value="year-desc">📅 Year (Newest)</option>
-        <option value="year-asc">📅 Year (Oldest)</option>
+        <option value="year-desc">📀 Year (Newest)</option>
+        <option value="year-asc">📀 Year (Oldest)</option>
       </select>
     </div>
 
@@ -347,7 +349,9 @@
         notesPlaceholder: "Add personal notes...",
         saveChanges: "💾 Save Changes",
         deleteBtn: "🗑️ Delete",
-        deleteConfirm: "Do you want to delete this album from your library?"
+        deleteConfirm: "Do you want to delete this album from your library?",
+        optDateDesc: "📅 Newest added",
+        optDateAsc: "📅 Oldest added"
       },
       es: {
         title: "📀 Mi Biblioteca",
@@ -377,7 +381,9 @@
         notesPlaceholder: "Añade notas personales...",
         saveChanges: "💾 Guardar Cambios",
         deleteBtn: "🗑️ Eliminar",
-        deleteConfirm: "¿Quieres eliminar este álbum de tu biblioteca?"
+        deleteConfirm: "¿Quieres eliminar este álbum de tu biblioteca?",
+        optDateDesc: "📅 Más recientes",
+        optDateAsc: "📅 Más antiguos"
       }
     };
 
@@ -411,7 +417,7 @@
         banner.classList.add("show");
       } else if (deferredInstallPrompt) {
         textEl.innerText = currentLang === "es"
-          ? "📲 Instala esta app en tu pantalla de inicio"
+          ? "📲 Instala la app en tu pantalla de inicio"
           : "📲 Install this app on your home screen";
         btnEl.innerText = currentLang === "es" ? "Instalar" : "Install";
         btnEl.style.display = "inline-block";
@@ -474,6 +480,9 @@
       document.getElementById("lblEditNotes").innerText = t.lblEditNotes;
       document.getElementById("lblEditBarcode").innerText = t.lblEditBarcode;
       document.getElementById("editNotes").placeholder = t.notesPlaceholder;
+
+      document.getElementById("optDateDesc").innerText = t.optDateDesc;
+      document.getElementById("optDateAsc").innerText = t.optDateAsc;
 
       document.getElementById("configBtn").innerText = currentLang === "es" ? "⚙️ Config" : "⚙️ Setup";
       document.getElementById("manualBarcode").placeholder = t.enterBarcode;
@@ -563,7 +572,11 @@
         const itemA = a.item;
         const itemB = b.item;
 
-        if (sortMode === "artist-asc") {
+        if (sortMode === "date-desc") {
+          return (itemB.timestamp || 0) - (itemA.timestamp || 0);
+        } else if (sortMode === "date-asc") {
+          return (itemA.timestamp || 0) - (itemB.timestamp || 0);
+        } else if (sortMode === "artist-asc") {
           return (itemA.artist || "").localeCompare(itemB.artist || "");
         } else if (sortMode === "artist-desc") {
           return (itemB.artist || "").localeCompare(itemA.artist || "");
@@ -848,7 +861,8 @@
           year: meta.year,
           genre: meta.genre || "",
           notes: "",
-          coverUrl: meta.coverUrl
+          coverUrl: meta.coverUrl,
+          timestamp: Date.now() // Timestamp de adición
         };
 
         await saveAlbumToGitHub(newAlbum);
@@ -859,7 +873,6 @@
           : `<strong>✅ Done!</strong><br>${meta.artist} – <i>${meta.title}</i> (${meta.format})`;
         await loadCollection();
 
-        // Cierre automático del modal de registro tras 1.2 segundos de éxito
         setTimeout(() => {
           closeScanner();
         }, 1200);
@@ -999,7 +1012,17 @@
         coverUrl = await lookupFallbackCover(artist, title);
       }
 
-      const newAlbum = { barcode: scannedBarcodeCache, artist, title, format, year, genre: "", notes: "", coverUrl };
+      const newAlbum = { 
+        barcode: scannedBarcodeCache, 
+        artist, 
+        title, 
+        format, 
+        year, 
+        genre: "", 
+        notes: "", 
+        coverUrl,
+        timestamp: Date.now() // Timestamp de adición
+      };
 
       try {
         await saveAlbumToGitHub(newAlbum);
@@ -1010,7 +1033,6 @@
         document.getElementById("manualForm").classList.remove("active");
         await loadCollection();
 
-        // Cierre automático del modal de registro tras 1.2 segundos de éxito
         setTimeout(() => {
           closeScanner();
         }, 1200);
