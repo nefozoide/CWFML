@@ -1,5 +1,16 @@
 [
   {
+    "barcode": "828765701723",
+    "artist": "Alicia Keys",
+    "title": "The Diary of Alicia Keys",
+    "format": "CD",
+    "year": "2003",
+    "genre": "",
+    "notes": "",
+    "coverUrl": "http://coverartarchive.org/release/1c9f809e-5a35-45a7-9f67-fb5648a8d033/34560937774-500.jpg",
+    "timestamp": 1794646972297
+  },
+  {
     "barcode": "707541748124",
     "artist": "Prince",
     "title": "Cinnamon Girl",
