@@ -1,5 +1,16 @@
 [
   {
+    "barcode": "602498848357",
+    "artist": "The Pussycat Dolls",
+    "title": "PCD",
+    "format": "CD",
+    "year": "2005",
+    "genre": "dance-pop",
+    "notes": "",
+    "coverUrl": "http://coverartarchive.org/release/e2061312-a062-4861-a9ca-f0402f0678b1/10987460661.jpg",
+    "timestamp": 1794645206592
+  },
+  {
     "barcode": "012414170026",
     "artist": "Syleena Johnson",
     "title": "Chapter 1: Love, Pain and Forgiveness",
